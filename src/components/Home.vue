@@ -67,8 +67,8 @@
             q-list-header Settings
             q-item-separator
             q-collapsible(group="settings" label="View" icon="view_quilt" separator)
-              .row
-                q-checkbox(v-model="showTable" label="Show Table")
+              q-field(label="Show Table" helper="Show summary table")
+                q-checkbox(v-model="showTable")
               .row
             q-collapsible(group="settings" label="Populations" icon="local_hospital" separator)
               q-field(:label="dhb.label" v-for="dhb in DHBs" :key="dhb.label")

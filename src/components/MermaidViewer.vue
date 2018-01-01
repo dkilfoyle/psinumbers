@@ -8,25 +8,27 @@
         q-btn(@click="zoomDemographics" flat icon="people" color="faded")
         q-btn(@click="zoomKnownOnset" flat icon="timer" color="faded")
         q-btn(@click="zoomLate" flat icon="timer_off" color="faded")
+        q-toggle(v-model="wheelZoom" icon="zoom_in")
     .row
       .mermaid#mermaid
 </template>
 
 <script>
-import { animate, easing, debounce, QToolbar, QToolbarTitle, QIcon, QBtn, QRadio, QCheckbox } from 'quasar'
+import { animate, easing, debounce, QToolbar, QToolbarTitle, QIcon, QBtn, QRadio, QCheckbox, QToggle } from 'quasar'
 import mermaid from 'mermaid'
 import svgPanZoom from 'svg-pan-zoom'
 
 export default {
   name: 'mermaid-viewer',
   components: {
-    QToolbar, QToolbarTitle, QIcon, QBtn, QRadio, QCheckbox
+    QToolbar, QToolbarTitle, QIcon, QBtn, QRadio, QCheckbox, QToggle
   },
   props: [ 'source' ],
   data () {
     return {
-      svgActive: false,
-      svgHovered: false,
+      wheelZoom: false,
+      // svgActive: false,
+      // svgHovered: false,
       graphCounter: 0,
       pan: {x: 0, y: 0},
       zoom: 0,
@@ -35,8 +37,10 @@ export default {
   },
   watch: {
     source: function () {
-      console.log(this.source)
       this.renderm()
+    },
+    wheelZoom: function () {
+      this.wheelZoom ? this.svgChart.enableMouseWheelZoom() : this.svgChart.disableMouseWheelZoom()
     }
   },
   mounted () {
@@ -96,37 +100,33 @@ export default {
 
       this.svgChart = svgPanZoom('#mermaid' + this.graphCounter, {
         controlIconsEnabled: true,
-        mouseWheelZoomEnabled: false,
+        mouseWheelZoomEnabled: this.wheelZoom,
         customEventsHandler: {
-          // haltEventListeners: ['wheel'],
           init: function (options) {
-            function updateSvgClassName () {
-              options.svgElement.setAttribute('class', '' + (self.svgActive ? 'active' : '') + (self.svgHovered ? ' hovered' : ''))
-            }
             this.listeners = {
-              click: function () {
-                if (this.svgActive) {
-                  options.instance.disableMouseWheelZoom()
-                  self.svgActive = false
-                }
-                else {
-                  options.instance.enableMouseWheelZoom()
-                  self.svgActive = true
-                }
-                updateSvgClassName()
-              },
-              mouseenter: function () {
-                self.svgHovered = true
-                updateSvgClassName()
-              },
-              mouseleave: function () {
-                self.svgActive = false
-                self.svgHovered = false
-                options.instance.disableMouseWheelZoom()
-                updateSvgClassName()
-              },
+              // click: function () {
+              //   if (this.svgActive) {
+              //     options.instance.disableMouseWheelZoom()
+              //     self.svgActive = false
+              //   }
+              //   else {
+              //     options.instance.enableMouseWheelZoom()
+              //     self.svgActive = true
+              //   }
+              //   updateSvgClassName()
+              // },
+              // mouseenter: function () {
+              //   self.svgHovered = true
+              //   updateSvgClassName()
+              // },
+              // mouseleave: function () {
+              //   self.svgActive = false
+              //   self.svgHovered = false
+              //   options.instance.disableMouseWheelZoom()
+              //   updateSvgClassName()
+              // },
               wheel: function (evt) {
-                if (!self.svgActive) {
+                if (!self.wheelZoom) {
                   if (evt.deltaY > 0) {
                     if (options.instance.getPan().y > -500) {
                       options.instance.panBy({x: 0, y: -20})
@@ -141,7 +141,7 @@ export default {
                 }
               }
             }
-            this.listeners.mousemove = this.listeners.mouseenter
+            // this.listeners.mousemove = this.listeners.mouseenter
             for (var eventName in this.listeners) {
               options.svgElement.addEventListener(eventName, this.listeners[eventName])
             }
