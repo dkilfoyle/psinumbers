@@ -99,36 +99,21 @@
             q-item-separator(v-if="showTable")
             q-item
               q-item-main
-                .row
-                  q-toolbar(color="light")
-                    q-toolbar-title(style="color: #777777") Flowchart
-                    q-btn(@click="showTable = !showTable" flat icon="list" color="faded") Table
-                    q-btn(@click="zoomFull" flat icon="zoom_out_map" color="faded") Full
-                    q-btn(@click="zoomDemographics" flat icon="people" color="faded") Demographics
-                    q-btn(@click="zoomKnownOnset" flat icon="timer" color="faded") Early
-                    q-btn(@click="zoomLate" flat icon="timer_off" color="faded") Late
-                .row
-                  .mermaid#mermaid
+                mermaid-viewer(:source="mermaidCode")
 </template>
 
 <script>
-import { animate, easing, debounce, QLayout, QToolbar, QToolbarTitle, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QCard, QCollapsible, QBtn, QInput, QSlider, QField, QSelect, QRadio, QCheckbox } from 'quasar'
-import mermaid from 'mermaid'
-import graphsrc from './graph.mmd'
-import svgPanZoom from 'svg-pan-zoom'
+import { QLayout, QToolbar, QToolbarTitle, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QCard, QCollapsible, QBtn, QInput, QSlider, QField, QSelect, QRadio, QCheckbox } from 'quasar'
+import MermaidViewer from './MermaidViewer'
 
 export default {
   name: 'home',
   components: {
-    QLayout, QToolbar, QToolbarTitle, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCard, QCollapsible, QSelect, QRadio, QCheckbox
+    MermaidViewer, QLayout, QToolbar, QToolbarTitle, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCard, QCollapsible, QSelect, QRadio, QCheckbox
   },
   data () {
     return {
       showTable: false,
-      svgActive: false,
-      svgHovered: false,
-      graphCounter: 0,
-      graph: graphsrc,
       nPopulation: 10000,
       nYear: 2018,
       pPopulationGrowth: 2.5,
@@ -150,18 +135,12 @@ export default {
         { label: 'CMDHB', value: 'CMDHB', n: 541080 },
         { label: 'WDHB', value: 'WDHB', n: 597510 },
         { label: 'Midland', value: 'Midland', n: 853725 },
-        { label: 'Northland', value: 'Northland', n: 170560 }],
-      pan: {x: 0, y: 0},
-      zoom: 0,
-      svgChart: undefined
+        { label: 'Northland', value: 'Northland', n: 170560 }]
     }
   },
   watch: {
     nCalculatedPopulation: function (newPop) {
       this.nPopulation = newPop
-    },
-    nTotalPSI: function () {
-      this.renderm()
     }
   },
   computed: {
@@ -234,45 +213,9 @@ graph TD
     }
   },
   mounted () {
-    mermaid.initialize({
-      startOnLoad: false,
-      flowchart: {
-        htmlLabels: true
-      }
-    })
     this.nPopulation = this.nCalculatedPopulation
   },
   methods: {
-    svgAnimate: function (zoomTo, panTo) {
-      var zoomFrom = this.svgChart.getZoom()
-      var panFrom = this.svgChart.getPan()
-      var self = this
-      animate.start({
-        from: 1,
-        to: 100,
-        easing: easing.standard,
-        duration: 500,
-        apply (pos) {
-          self.svgChart.zoom(zoomFrom + (zoomTo - zoomFrom) * pos / 100)
-          self.svgChart.pan({
-            x: panFrom.x + (panTo.x - panFrom.x) * pos / 100,
-            y: panFrom.y + (panTo.y - panFrom.y) * pos / 100
-          })
-        }
-      })
-    },
-    zoomFull: function () {
-      this.svgAnimate(1, {x: -5, y: 8})
-    },
-    zoomDemographics: function () {
-      this.svgAnimate(2.6, {x: -1321, y: 13})
-    },
-    zoomKnownOnset: function () {
-      this.svgAnimate(1.56, {x: 122, y: -607})
-    },
-    zoomLate: function () {
-      this.svgAnimate(1.35997, {x: -173, y: -595})
-    },
     getCalculatedPopulation: function (sPopulations, year) {
       var x = 0
       sPopulations.forEach(o1 => {
@@ -291,91 +234,10 @@ graph TD
       var late = (suto + gt4h) * this.pLateInclusion * this.pCTPGood
 
       return Math.round(early + late)
-    },
-    renderm: debounce(function () {
-      var mermaidNode = document.getElementById('mermaid')
-      this.graphCounter = this.graphCounter + 1
-      mermaid.render('mermaid' + this.graphCounter, this.mermaidCode, (svgCode, bindFunctions) => {
-        mermaidNode.innerHTML = svgCode
-      })
-      var svgNode = document.getElementById('mermaid' + this.graphCounter)
-      svgNode.setAttribute('width', '100%')
-
-      if (this.svgChart) { // save zoom and pan states
-        this.zoom = this.svgChart.getZoom()
-        this.pan = this.svgChart.getPan()
-      }
-
-      var hello = this
-
-      this.svgChart = svgPanZoom('#mermaid' + this.graphCounter, {
-        controlIconsEnabled: true,
-        mouseWheelZoomEnabled: false,
-        customEventsHandler: {
-          // haltEventListeners: ['wheel'],
-          init: function (options) {
-            function updateSvgClassName () {
-              options.svgElement.setAttribute('class', '' + (hello.svgActive ? 'active' : '') + (hello.svgHovered ? ' hovered' : ''))
-            }
-            this.listeners = {
-              click: function () {
-                if (this.svgActive) {
-                  options.instance.disableMouseWheelZoom()
-                  hello.svgActive = false
-                }
-                else {
-                  options.instance.enableMouseWheelZoom()
-                  hello.svgActive = true
-                }
-                updateSvgClassName()
-              },
-              mouseenter: function () {
-                hello.svgHovered = true
-                updateSvgClassName()
-              },
-              mouseleave: function () {
-                hello.svgActive = false
-                hello.svgHovered = false
-                options.instance.disableMouseWheelZoom()
-                updateSvgClassName()
-              },
-              wheel: function (evt) {
-                if (!hello.svgActive) {
-                  if (evt.deltaY > 0) {
-                    options.instance.panBy({x: 0, y: -20})
-                  }
-                  else if (evt.deltaY < 0) {
-                    options.instance.panBy({x: 0, y: 20})
-                  }
-                  evt.preventDefault()
-                }
-              }
-            }
-            this.listeners.mousemove = this.listeners.mouseenter
-            for (var eventName in this.listeners) {
-              options.svgElement.addEventListener(eventName, this.listeners[eventName])
-            }
-          }, // init
-          destroy: function (options) {
-            for (var eventName in this.listeners) {
-              options.svgElement.removeEventListener(eventName, this.listeners[eventName])
-            }
-          } // destroy
-        } // custom events handler
-      }) // svgPanZoom init
-
-      if (this.graphCounter > 1) {
-        this.svgChart.zoom(this.zoom)
-        this.svgChart.pan(this.pan)
-      }
-    }, 300)
+    }
   }
 }
 </script>
 
 <style>
-.mermaid {
-  width: 100%;
-  height: 900px;
-}
 </style>
