@@ -12,7 +12,7 @@
             q-list-header Parameters
             q-item-separator
 
-            q-collapsible(group="parameters" label="Demographics" icon="people" separator dense)
+            q-collapsible(group="parameters" label="Demographics" icon="people" separator)
               q-field(label="Populations")
                 q-select(multiple chips v-model="sPopulations" :options="DHBs")
               q-field(label="Population Growth" helper="Annual %")
@@ -66,13 +66,13 @@
           q-list
             q-list-header Settings
             q-item-separator
-            q-collapsible(group="settings" label="View" icon="timer_off" separator)
-              q-checkbox(v-model="showTable" label="Show Table")
-              q-btn(@click="zoomFull" flat) Full
-              q-btn(@click="zoomDemographics" flat) Demographics
-              q-btn(@click="zoomKnownOnset" flat) Known Onset
-              q-btn(@click="zoomLate" flat) Late Presenters
-            q-collapsible(group="settings" label="Populations" icon="timer_off" separator)
+            q-collapsible(group="settings" label="View" icon="view_quilt" separator)
+              .row
+                q-checkbox(v-model="showTable" label="Show Table")
+              .row
+            q-collapsible(group="settings" label="Populations" icon="local_hospital" separator)
+              q-field(:label="dhb.label" v-for="dhb in DHBs" :key="dhb.label")
+                q-input(v-model="dhb.n" type="number")
 
         .col-8
           q-list
@@ -98,12 +98,21 @@
                       td {{ getTotalPSI(sPopulations, 2022) }}
             q-item-separator(v-if="showTable")
             q-item
-              q-item-main 
-                .mermaid#mermaid
+              q-item-main
+                .row
+                  q-toolbar(color="light")
+                    q-toolbar-title(style="color: #777777") Flowchart
+                    q-btn(@click="showTable = !showTable" flat icon="list" color="faded") Table
+                    q-btn(@click="zoomFull" flat icon="zoom_out_map" color="faded") Full
+                    q-btn(@click="zoomDemographics" flat icon="people" color="faded") Demographics
+                    q-btn(@click="zoomKnownOnset" flat icon="timer" color="faded") Early
+                    q-btn(@click="zoomLate" flat icon="timer_off" color="faded") Late
+                .row
+                  .mermaid#mermaid
 </template>
 
 <script>
-import { debounce, QLayout, QToolbar, QToolbarTitle, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QCard, QCollapsible, QBtn, QInput, QSlider, QField, QSelect, QRadio, QCheckbox } from 'quasar'
+import { animate, easing, debounce, QLayout, QToolbar, QToolbarTitle, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QCard, QCollapsible, QBtn, QInput, QSlider, QField, QSelect, QRadio, QCheckbox } from 'quasar'
 import mermaid from 'mermaid'
 import graphsrc from './graph.mmd'
 import svgPanZoom from 'svg-pan-zoom'
@@ -232,6 +241,36 @@ graph TD
     this.nPopulation = this.nCalculatedPopulation
   },
   methods: {
+    svgAnimate: function (zoomTo, panTo) {
+      var zoomFrom = this.svgChart.getZoom()
+      var panFrom = this.svgChart.getPan()
+      var self = this
+      animate.start({
+        from: 1,
+        to: 100,
+        easing: easing.standard,
+        duration: 500,
+        apply (pos) {
+          self.svgChart.zoom(zoomFrom + (zoomTo - zoomFrom) * pos / 100)
+          self.svgChart.pan({
+            x: panFrom.x + (panTo.x - panFrom.x) * pos / 100,
+            y: panFrom.y + (panTo.y - panFrom.y) * pos / 100
+          })
+        }
+      })
+    },
+    zoomFull: function () {
+      this.svgAnimate(1, {x: -5, y: 8})
+    },
+    zoomDemographics: function () {
+      this.svgAnimate(2.6, {x: -1321, y: 13})
+    },
+    zoomKnownOnset: function () {
+      this.svgAnimate(1.56, {x: 122, y: -607})
+    },
+    zoomLate: function () {
+      this.svgAnimate(1.35997, {x: -173, y: -595})
+    },
     getCalculatedPopulation: function (sPopulations, year) {
       var x = 0
       sPopulations.forEach(o1 => {
