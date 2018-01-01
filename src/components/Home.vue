@@ -100,6 +100,8 @@
             q-item
               q-item-main
                 mermaid-viewer(:source="mermaidCode")
+                  q-btn(@click="showTable = !showTable" flat icon="list" color="faded")
+
 </template>
 
 <script>

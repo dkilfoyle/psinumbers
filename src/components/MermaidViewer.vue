@@ -3,7 +3,7 @@
     .row
       q-toolbar(color="light")
         q-toolbar-title(style="color: #777777") Flowchart
-        q-btn(@click="emit('toggleTable')" flat icon="list" color="faded")
+        slot
         q-btn(@click="zoomFull" flat icon="zoom_out_map" color="faded")
         q-btn(@click="zoomDemographics" flat icon="people" color="faded")
         q-btn(@click="zoomKnownOnset" flat icon="timer" color="faded")
@@ -25,7 +25,6 @@ export default {
   props: [ 'source' ],
   data () {
     return {
-      showTable: false,
       svgActive: false,
       svgHovered: false,
       graphCounter: 0,
@@ -127,7 +126,6 @@ export default {
                 updateSvgClassName()
               },
               wheel: function (evt) {
-                // TODO: pan limits
                 if (!self.svgActive) {
                   if (evt.deltaY > 0) {
                     if (options.instance.getPan().y > -500) {
