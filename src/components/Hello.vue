@@ -125,6 +125,8 @@ export default {
   data () {
     return {
       showTable: true,
+      svgActive: false,
+      svgHovered: false,
       graphCounter: 0,
       graph: graphsrc,
       nPopulation: 10000,
@@ -305,8 +307,47 @@ graph TD
       }
 
       this.svgChart = svgPanZoom('#mermaid' + this.graphCounter, {
-        controlIconsEnabled: true
-      })
+        controlIconsEnabled: true,
+        customEventsHandler: {
+          init: function (options) {
+            function updateSvgClassName () {
+              options.svgElement.setAttribute('class', '' + (this.svgActive ? 'active' : '') + (this.svgHovered ? ' hovered' : ''))
+            }
+            this.listeners = {
+              click: function () {
+                if (this.svgActive) {
+                  options.instance.disableZoom()
+                  this.svgActive = false
+                }
+                else {
+                  options.instance.enableZoom()
+                  this.svgActive = true
+                }
+                updateSvgClassName()
+              },
+              mouseenter: function () {
+                this.svgHovered = true
+                updateSvgClassName()
+              },
+              mouseleave: function () {
+                this.svgActive = false
+                this.svgHovered = false
+                options.instance.disableZoom()
+                updateSvgClassName()
+              }
+            }
+            this.listeners.mousemove = this.listeners.mouseenter
+            for (var eventName in this.listeners) {
+              options.svgElement.addEventListener(eventName, this.listeners[eventName])
+            }
+          }, // init
+          destroy: function (options) {
+            for (var eventName in this.listeners) {
+              options.svgElement.removeEventListener(eventName, this.listeners[eventName])
+            }
+          } // destroy
+        } // custom events handler
+      }) // svgPanZoom init
 
       if (this.graphCounter > 1) {
         this.svgChart.zoom(this.zoom)
