@@ -3,11 +3,11 @@
     .row
       q-toolbar(color="light")
         q-toolbar-title(style="color: #777777") Flowchart
-        q-btn(@click="showTable = !showTable" flat icon="list" color="faded") Table
-        q-btn(@click="zoomFull" flat icon="zoom_out_map" color="faded") Full
-        q-btn(@click="zoomDemographics" flat icon="people" color="faded") Demographics
-        q-btn(@click="zoomKnownOnset" flat icon="timer" color="faded") Early
-        q-btn(@click="zoomLate" flat icon="timer_off" color="faded") Late
+        q-btn(@click="emit('toggleTable')" flat icon="list" color="faded")
+        q-btn(@click="zoomFull" flat icon="zoom_out_map" color="faded")
+        q-btn(@click="zoomDemographics" flat icon="people" color="faded")
+        q-btn(@click="zoomKnownOnset" flat icon="timer" color="faded")
+        q-btn(@click="zoomLate" flat icon="timer_off" color="faded")
     .row
       .mermaid#mermaid
 </template>
@@ -93,7 +93,7 @@ export default {
         this.pan = this.svgChart.getPan()
       }
 
-      var hello = this
+      var self = this
 
       this.svgChart = svgPanZoom('#mermaid' + this.graphCounter, {
         controlIconsEnabled: true,
@@ -102,37 +102,42 @@ export default {
           // haltEventListeners: ['wheel'],
           init: function (options) {
             function updateSvgClassName () {
-              options.svgElement.setAttribute('class', '' + (hello.svgActive ? 'active' : '') + (hello.svgHovered ? ' hovered' : ''))
+              options.svgElement.setAttribute('class', '' + (self.svgActive ? 'active' : '') + (self.svgHovered ? ' hovered' : ''))
             }
             this.listeners = {
               click: function () {
                 if (this.svgActive) {
                   options.instance.disableMouseWheelZoom()
-                  hello.svgActive = false
+                  self.svgActive = false
                 }
                 else {
                   options.instance.enableMouseWheelZoom()
-                  hello.svgActive = true
+                  self.svgActive = true
                 }
                 updateSvgClassName()
               },
               mouseenter: function () {
-                hello.svgHovered = true
+                self.svgHovered = true
                 updateSvgClassName()
               },
               mouseleave: function () {
-                hello.svgActive = false
-                hello.svgHovered = false
+                self.svgActive = false
+                self.svgHovered = false
                 options.instance.disableMouseWheelZoom()
                 updateSvgClassName()
               },
               wheel: function (evt) {
-                if (!hello.svgActive) {
+                // TODO: pan limits
+                if (!self.svgActive) {
                   if (evt.deltaY > 0) {
-                    options.instance.panBy({x: 0, y: -20})
+                    if (options.instance.getPan().y > -500) {
+                      options.instance.panBy({x: 0, y: -20})
+                    }
                   }
                   else if (evt.deltaY < 0) {
-                    options.instance.panBy({x: 0, y: 20})
+                    if (options.instance.getPan().y < 500) {
+                      options.instance.panBy({x: 0, y: 20})
+                    }
                   }
                   evt.preventDefault()
                 }
