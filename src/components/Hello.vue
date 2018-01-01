@@ -124,7 +124,7 @@ export default {
   },
   data () {
     return {
-      showTable: true,
+      showTable: false,
       svgActive: false,
       svgHovered: false,
       graphCounter: 0,
@@ -306,34 +306,49 @@ graph TD
         this.pan = this.svgChart.getPan()
       }
 
+      var hello = this
+
       this.svgChart = svgPanZoom('#mermaid' + this.graphCounter, {
         controlIconsEnabled: true,
+        mouseWheelZoomEnabled: false,
         customEventsHandler: {
+          // haltEventListeners: ['wheel'],
           init: function (options) {
             function updateSvgClassName () {
-              options.svgElement.setAttribute('class', '' + (this.svgActive ? 'active' : '') + (this.svgHovered ? ' hovered' : ''))
+              options.svgElement.setAttribute('class', '' + (hello.svgActive ? 'active' : '') + (hello.svgHovered ? ' hovered' : ''))
             }
             this.listeners = {
               click: function () {
                 if (this.svgActive) {
-                  options.instance.disableZoom()
-                  this.svgActive = false
+                  options.instance.disableMouseWheelZoom()
+                  hello.svgActive = false
                 }
                 else {
-                  options.instance.enableZoom()
-                  this.svgActive = true
+                  options.instance.enableMouseWheelZoom()
+                  hello.svgActive = true
                 }
                 updateSvgClassName()
               },
               mouseenter: function () {
-                this.svgHovered = true
+                hello.svgHovered = true
                 updateSvgClassName()
               },
               mouseleave: function () {
-                this.svgActive = false
-                this.svgHovered = false
-                options.instance.disableZoom()
+                hello.svgActive = false
+                hello.svgHovered = false
+                options.instance.disableMouseWheelZoom()
                 updateSvgClassName()
+              },
+              wheel: function (evt) {
+                if (!hello.svgActive) {
+                  if (evt.deltaY > 0) {
+                    options.instance.panBy({x: 0, y: -20})
+                  }
+                  else if (evt.deltaY < 0) {
+                    options.instance.panBy({x: 0, y: 20})
+                  }
+                  evt.preventDefault()
+                }
               }
             }
             this.listeners.mousemove = this.listeners.mouseenter
@@ -353,20 +368,6 @@ graph TD
         this.svgChart.zoom(this.zoom)
         this.svgChart.pan(this.pan)
       }
-      // svgChart.updateBBox()
-      // svgChart.resize()
-      // svgChart.fit()
-
-      // var mermaidNode = document.getElementById('mermaid')
-      // // prevent mermaid skip rendering
-      // mermaidNode.removeAttribute('data-processed')
-      // mermaidNode.replaceChild(document.createTextNode(this.mermaidCode), mermaidNode.firstChild)
-      // mermaid.init(undefined, mermaidNode)
-      // var svgChart = svgPanZoom('#mermaidChart1', {
-      //   controlIconsEnabled: true
-      // })
-      // svgChart.updateBBox() // Update viewport bounding box
-      // svgChart.fit() // fit works as expected
     }, 300)
   }
 }
