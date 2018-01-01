@@ -118,7 +118,7 @@ import graphsrc from './graph.mmd'
 import svgPanZoom from 'svg-pan-zoom'
 
 export default {
-  name: 'index',
+  name: 'home',
   components: {
     QLayout, QToolbar, QToolbarTitle, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCard, QCollapsible, QSelect, QRadio, QCheckbox
   },
