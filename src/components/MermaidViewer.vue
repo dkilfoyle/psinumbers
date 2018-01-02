@@ -101,42 +101,25 @@ export default {
       this.svgChart = svgPanZoom('#mermaid' + this.graphCounter, {
         controlIconsEnabled: true,
         mouseWheelZoomEnabled: this.wheelZoom,
+        beforePan: function (oldPan, newPan) {
+          var gutterWidth = 100,
+            gutterHeight = 100,
+            sizes = this.getSizes(),
+            leftLimit = -((sizes.viewBox.x + sizes.viewBox.width) * sizes.realZoom) + gutterWidth,
+            rightLimit = sizes.width - gutterWidth - (sizes.viewBox.x * sizes.realZoom),
+            topLimit = -((sizes.viewBox.y + sizes.viewBox.height) * sizes.realZoom) + gutterHeight,
+            bottomLimit = sizes.height - gutterHeight - (sizes.viewBox.y * sizes.realZoom)
+          var customPan = {}
+          customPan.x = Math.max(leftLimit, Math.min(rightLimit, newPan.x))
+          customPan.y = Math.max(topLimit, Math.min(bottomLimit, newPan.y))
+          return customPan
+        },
         customEventsHandler: {
           init: function (options) {
             this.listeners = {
-              // click: function () {
-              //   if (this.svgActive) {
-              //     options.instance.disableMouseWheelZoom()
-              //     self.svgActive = false
-              //   }
-              //   else {
-              //     options.instance.enableMouseWheelZoom()
-              //     self.svgActive = true
-              //   }
-              //   updateSvgClassName()
-              // },
-              // mouseenter: function () {
-              //   self.svgHovered = true
-              //   updateSvgClassName()
-              // },
-              // mouseleave: function () {
-              //   self.svgActive = false
-              //   self.svgHovered = false
-              //   options.instance.disableMouseWheelZoom()
-              //   updateSvgClassName()
-              // },
               wheel: function (evt) {
                 if (!self.wheelZoom) {
-                  if (evt.deltaY > 0) {
-                    if (options.instance.getPan().y > -500) {
-                      options.instance.panBy({x: 0, y: -20})
-                    }
-                  }
-                  else if (evt.deltaY < 0) {
-                    if (options.instance.getPan().y < 500) {
-                      options.instance.panBy({x: 0, y: 20})
-                    }
-                  }
+                  options.instance.panBy({x: 0, y: -20 * Math.sign(evt.deltaY)})
                   evt.preventDefault()
                 }
               }
