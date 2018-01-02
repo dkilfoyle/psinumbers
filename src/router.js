@@ -25,7 +25,15 @@ export default new VueRouter({
   scrollBehavior: () => ({ y: 0 }),
 
   routes: [
-    { path: '/', component: load('Home') },
+    { path: '/',
+      component: load('Home'),
+      children: [
+        { path: '/', component: load('PSI') },
+        { path: 'PSI', component: load('PSI') },
+        { path: 'IVT', component: load('IVT') },
+        { path: 'Diversion', component: load('Diversion') }
+      ]
+    },
 
     // Always leave this last one
     { path: '*', component: load('Error404') } // Not found
