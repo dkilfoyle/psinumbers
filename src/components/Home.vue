@@ -93,6 +93,13 @@
                           th 2022
                       tbody
                         tr
+                          td IVT
+                          td {{ getIVT(sPopulations, 2018) }}
+                          td {{ getIVT(sPopulations, 2019) }}
+                          td {{ getIVT(sPopulations, 2020) }}
+                          td {{ getIVT(sPopulations, 2021) }}
+                          td {{ getIVT(sPopulations, 2022) }}    
+                        tr
                           td IVT and PSI
                           td {{ getIVTPSI(sPopulations, 2018) }}
                           td {{ getIVTPSI(sPopulations, 2019) }}
@@ -144,6 +151,7 @@ export default {
       pLateInclusion: 0.25,
       pCTPGood: 0.57,
       pRecannalized: 0.05,
+      pIVT: 0.15,
       DHBs: [
         { label: 'ADHB', value: 'ADHB', n: 510450 },
         { label: 'CMDHB', value: 'CMDHB', n: 541080 },
@@ -255,6 +263,11 @@ graph TD
 
       var early = x * this.pKTO * this.pLT4h * this.pInclusion * (1.0 - this.pRecannalized)
       return Math.round(early)
+    },
+    getIVT: function (sPopulations, year) {
+      var x = this.getCalculatedPopulation(sPopulations, year)
+      x = x * this.pAdults * (this.pIncidence / 100000) * this.pIschemic * this.pIVT
+      return Math.round(x)
     }
   }
 }
