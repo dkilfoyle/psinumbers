@@ -77,27 +77,35 @@
         .col-8
           q-list
             q-slide-transition
-              q-item(v-if="showTable" key="tableItem")
-                q-item-main
-                  h6 Summary
-                  table.q-table
-                    thead
-                      tr
-                        th
-                        th 2018
-                        th 2019
-                        th 2020
-                        th 2021
-                        th 2022
-                    tbody
-                      tr
-                        td Total PSI
-                        td {{ getTotalPSI(sPopulations, 2018) }}
-                        td {{ getTotalPSI(sPopulations, 2019) }}
-                        td {{ getTotalPSI(sPopulations, 2020) }}
-                        td {{ getTotalPSI(sPopulations, 2021) }}
-                        td {{ getTotalPSI(sPopulations, 2022) }}
-            q-item-separator(v-if="showTable" key="tableSeparator")
+              div(v-show="showTable")
+                q-item( key="tableItem")
+                  q-item-main
+                    h6 Summary
+                    table.q-table
+                      thead
+                        tr
+                          th
+                          th 2018
+                          th 2019
+                          th 2020
+                          th 2021
+                          th 2022
+                      tbody
+                        tr
+                          td IVT and PSI
+                          td {{ getIVTPSI(sPopulations, 2018) }}
+                          td {{ getIVTPSI(sPopulations, 2019) }}
+                          td {{ getIVTPSI(sPopulations, 2020) }}
+                          td {{ getIVTPSI(sPopulations, 2021) }}
+                          td {{ getIVTPSI(sPopulations, 2022) }}                          
+                        tr
+                          td Total PSI
+                          td {{ getTotalPSI(sPopulations, 2018) }}
+                          td {{ getTotalPSI(sPopulations, 2019) }}
+                          td {{ getTotalPSI(sPopulations, 2020) }}
+                          td {{ getTotalPSI(sPopulations, 2021) }}
+                          td {{ getTotalPSI(sPopulations, 2022) }}
+                q-item-separator
             q-item
               q-item-main
                 mermaid-viewer(:source="mermaidCode")
@@ -239,6 +247,13 @@ graph TD
       var late = (suto + gt4h) * this.pLateInclusion * this.pCTPGood
 
       return Math.round(early + late)
+    },
+    getIVTPSI: function (sPopulations, year) {
+      var x = this.getCalculatedPopulation(sPopulations, year)
+      x = x * this.pAdults * (this.pIncidence / 100000) * this.pIschemic * this.pLVO * this.pNIHSS
+
+      var early = x * this.pKTO * this.pLT4h * this.pInclusion * (1.0 - this.pRecannalized)
+      return Math.round(early)
     }
   }
 }
