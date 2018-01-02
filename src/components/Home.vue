@@ -78,9 +78,10 @@
           q-list
             q-slide-transition
               div(v-show="showTable")
+                q-list-header Summary Table
+                q-item-separator
                 q-item( key="tableItem")
                   q-item-main
-                    h6 Summary
                     table.q-table
                       thead
                         tr
@@ -105,7 +106,7 @@
                           td {{ getTotalPSI(sPopulations, 2020) }}
                           td {{ getTotalPSI(sPopulations, 2021) }}
                           td {{ getTotalPSI(sPopulations, 2022) }}
-                q-item-separator
+            q-item-separator(v-show="showTable")
             q-item
               q-item-main
                 mermaid-viewer(:source="mermaidCode")
