@@ -1,7 +1,7 @@
 <template lang="pug">
   .layout-padding
     .row.md-gutter
-      .col-4
+      .col-sm-4
         q-list
           q-list-header PSI Parameters
           q-item-separator
@@ -68,7 +68,7 @@
             q-field(:label="dhb.label" v-for="dhb in DHBs" :key="dhb.label")
               q-input(v-model="dhb.n" type="number")
 
-      .col-8
+      .col-sm-8
         q-list
           q-slide-transition
             div(v-show="showTable")
@@ -111,16 +111,17 @@
           q-item
             q-item-main
               mermaid-viewer(:source="mmdTemplate(this)" :maxwidth="true" title="PSI" :presets=`[
-                { label: 'Full', icon: 'zoom_out_map', zoom: 1, x: -5, y: 8 },
-                { label: 'People', icon: 'people', zoom: 2.6, x: -1321, y: 13 },
-                { label: 'Early', icon: 'timer', zoom: 1.56, x: 122, y: -607 },
-                { label: 'Late', icon: 'timer_off', zoom: 1.35997, x: -173, y: -595 }
+                { label: 'Zoom: Full', icon: 'zoom_out_map', zoom: 1, x: -5, y: 8 },
+                { label: 'Zoom: Demographics', icon: 'people', zoom: 2.6, x: -1321, y: 13 },
+                { label: 'Zoom: Early presenters', icon: 'timer', zoom: 1.56, x: 122, y: -607 },
+                { label: 'Zoom: Late presenters', icon: 'timer_off', zoom: 1.35997, x: -173, y: -595 }
               ]`)
                 q-btn(@click="showTable = !showTable" flat icon="list" color="faded")
+                  q-tooltip Show Table
 </template>
 
 <script>
-import { QSlideTransition, QLayout, QToolbar, QToolbarTitle, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QCard, QCollapsible, QBtn, QInput, QSlider, QField, QSelect, QRadio, QCheckbox } from 'quasar'
+import { Toast, QTooltip, QSlideTransition, QLayout, QToolbar, QToolbarTitle, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QCard, QCollapsible, QBtn, QInput, QSlider, QField, QSelect, QRadio, QCheckbox } from 'quasar'
 import MermaidViewer from './MermaidViewer'
 import 'quasar-extras/animate/fadeOutUp.css'
 import 'quasar-extras/animate/fadeInDown.css'
@@ -130,7 +131,7 @@ import numeral from 'numeral'
 export default {
   name: 'psi',
   components: {
-    MermaidViewer, QSlideTransition, QLayout, QToolbar, QToolbarTitle, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCard, QCollapsible, QSelect, QRadio, QCheckbox
+    QTooltip, MermaidViewer, QSlideTransition, QLayout, QToolbar, QToolbarTitle, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCard, QCollapsible, QSelect, QRadio, QCheckbox
   },
   data () {
     return {
@@ -211,6 +212,11 @@ export default {
   },
   mounted () {
     this.nPopulation = this.nCalculatedPopulation
+    Toast.create({
+      html: 'Click the menu icon in the top left of the toolbar to display the menu',
+      icon: 'menu',
+      timeout: 5000
+    })
   },
   methods: {
     getCalculatedPopulation: function (sPopulations, year) {

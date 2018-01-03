@@ -6,21 +6,23 @@
         slot
         div(v-for="(item, index) in presets")
           q-btn(@click="presetZoomPan(index)" flat :icon="item.icon" color="faded")
+            q-tooltip {{ item.label }}
         //- q-btn(@click="logPanZoom") Log
         q-toggle(v-model="wheelZoom" icon="zoom_in")
+          q-tooltip Zoom: Mouse
     .row
       .mermaid(:id="'mermaid'+title")
 </template>
 
 <script>
-import { animate, easing, debounce, QToolbar, QToolbarTitle, QIcon, QBtn, QRadio, QCheckbox, QToggle } from 'quasar'
+import { animate, easing, debounce, QToolbar, QToolbarTitle, QIcon, QBtn, QRadio, QCheckbox, QToggle, QTooltip } from 'quasar'
 import mermaid from 'mermaid'
 import svgPanZoom from 'svg-pan-zoom'
 
 export default {
   name: 'mermaid-viewer',
   components: {
-    QToolbar, QToolbarTitle, QIcon, QBtn, QRadio, QCheckbox, QToggle
+    QToolbar, QToolbarTitle, QIcon, QBtn, QRadio, QCheckbox, QToggle, QTooltip
   },
   props: [ 'source', 'title', 'presets', 'maxwidth' ],
   data () {
