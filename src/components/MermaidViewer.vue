@@ -6,7 +6,7 @@
         slot
         div(v-for="(item, index) in presets")
           q-btn(@click="presetZoomPan(index)" flat :icon="item.icon" color="faded")
-        q-btn(@click="logPanZoom") Log
+        //- q-btn(@click="logPanZoom") Log
         q-toggle(v-model="wheelZoom" icon="zoom_in")
     .row
       .mermaid(:id="'mermaid'+title")

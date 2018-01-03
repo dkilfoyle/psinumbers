@@ -28,7 +28,7 @@ export default new VueRouter({
     { path: '/',
       component: load('Home'),
       children: [
-        { path: '/', component: load('IVT') },
+        { path: '/', component: load('TitlePage') },
         { path: 'PSI', component: load('PSI') },
         { path: 'IVT', component: load('IVT') },
         { path: 'Diversion', component: load('Diversion') }

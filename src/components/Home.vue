@@ -10,14 +10,14 @@
       q-list(no-border link)
         q-list-header Menu
         q-side-link(item to="PSI")
-          q-item-side(icon="school")
-          q-item-main(label="PSI" sublabel="Percutaneous Clot Retrieval")
-        q-side-link(item to="IVT" @click="$refs.layout.toggleLeft()")
-          q-item-side(icon="school")
-          q-item-main(label="IVT" sublabel="Intravenous Thrombolysis")
+          q-item-side(icon="local_parking")
+          q-item-main(label="PSI" sublabel="Percutaneous Clot Retrieval" @click="$refs.layout.toggleLeft()")
+        q-side-link(item to="IVT")
+          q-item-side(icon="info")
+          q-item-main(label="IVT" sublabel="Intravenous Thrombolysis" @click="$refs.layout.toggleLeft()")
         q-side-link(item to="Diversion")
-          q-item-side(icon="school")
-          q-item-main(label="Diversion" sublabel="Ambulance Diversion")
+          q-item-side(icon="local_hospital")
+          q-item-main(label="Diversion" sublabel="Ambulance Diversion" @click="$refs.layout.toggleLeft()")
 
     router-view.layout-view
 </template>
@@ -55,7 +55,7 @@ export default {
   data () {
     return {
       sides: {
-        left: false,
+        left: true,
         right: false
       }
     }
