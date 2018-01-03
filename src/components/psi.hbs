@@ -1,0 +1,45 @@
+graph TD
+  Population(Population<br>N={{num nPopulation}}) -- {{prop pAdults}} Adult --> Adults[Adults<br>N={{num nAdults}}]
+  Adults -- Stroke Incidence<br>{{pIncidence}}/100,000 --> Strokes[Strokes<br>N={{num nStrokes}}]
+
+  Strokes -- Ischemic {{prop pIschemic}} --> Ischemic[Ischemic<br>N={{num nIschemic}}]
+  Strokes -- Hemorrhagic {{prop pHemorrhagic}} --> ICH(Hemorrhage<br>N={{num nHemorrhagic}})
+
+  Ischemic -- LVO {{prop pLVO}} --> LVO[LVO<br>N={{num nLVO}}]
+  Ischemic -- SVO {{prop pSVO}} --> SVO(SVO<br>N={{num nSVO}})
+
+  LVO -- NIHSS>=6 {{prop pModerate}} --> Moderate[Moderate-Severe<br>N={{num nModerate}}]
+  LVO -- NIHSS< 6 {{prop pMild}} --> Mild(Mild<br>N={{num nMild}})
+
+  Moderate -- Onset/LSW <12h<br>{{prop pKTO}} --> KTO[KTO<br>{{num nKTO}}]
+  Moderate -- Unknown Onset<br>{{prop pSUTO}} --> SUTO[SUTO<br>{{num nSUTO}}]
+  Moderate -- Known Onset > 12h<br>{{prop pGT12h}} --> TooLate(Too Late<br>{{num nTooLate}})
+
+  subgraph Early
+  KTO -- <4h {{pLT4h}} --> LT4h[0-4h<br>{{nLT4h}}]
+  LT4h -- No Exclusions<br>{{prop pEarlyInclusion}} --> Inclusion[IVT and PSI Eligible<br>{{nEarlyInclusion}}]
+  LT4h -- mRS>2, ASPECTS<6<br>{{prop pEarlyExclusion}} --> Ineligible[Ineligible<br>{{nEarlyExclusion}}]
+  Inclusion -- Lysis recanalized {{prop pRecannalized}} --> Lysed[PSI not required<br>{{num nPSINotReqd}}]
+  Inclusion -- No recannalization {{prop pNotRecannalized}} --> PSIReqd[PSI required<br>{{num nPSIReqd}}]
+  end
+
+  subgraph Late
+  KTO -- >4h {{prop pGT4h}} --> GT4h[4-12h <br>{{num nGT4h}}]
+  GT4h-->Late[Late<br>{{num nLate}}]
+  SUTO-->Late
+  Late -- No Exclusions<br>{{prop pLateInclusion}} --> LateInclusion[No Exclusions<br>{{num nLateInclusion}}]
+  Late -- mRS>2, ASPECTS<6<br>{{prop pLateExclusion}} --> Exclusion[Ineligible<br>{{num nLateExclusion}}]
+  LateInclusion -- Favourable CTP {{prop pCTPGood}} --> CTPGood[Favourable CTP<br>{{num nCTPGood}}]
+  LateInclusion -- Unfavourable CTP {{prop pCTPBad}} --> CTPBad[Unfavourable CTP<br>{{num nCTPBad}}]
+  end
+
+  CTPGood-->TotalPSI[Total PSI<br>N={{num nTotalPSI}}]
+  PSIReqd-->TotalPSI
+
+  style SVO fill:#d3d3d3,stroke:#808080
+  style Ineligible fill:#d3d3d3,stroke:#808080
+  style ICH fill:#d3d3d3,stroke:#808080
+  style CTPBad fill:#d3d3d3,stroke:#808080
+  style Exclusion fill:#d3d3d3,stroke:#808080
+  style TooLate fill:#d3d3d3,stroke:#808080
+  style Mild fill:#d3d3d3,stroke:#808080

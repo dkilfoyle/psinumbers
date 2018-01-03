@@ -3,7 +3,7 @@
     .row.md-gutter
       .col-4
         q-list
-          q-list-header Parameters
+          q-list-header PSI Parameters
           q-item-separator
 
           q-collapsible(group="parameters" label="Demographics" icon="people" separator)
@@ -35,7 +35,7 @@
 
           q-collapsible(group="parameters" label="Clinical" icon="favorite" separator)
             q-field(label="Moderate+ Deficit" helper="% of LVO with NIHSS >= 6 (80%)")
-              q-slider(v-model="pNIHSS" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pNIHSS*100)}%`")
+              q-slider(v-model="pModerate" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pModerate*100)}%`")
 
           q-collapsible(group="parameters" label="Onset Time" icon="timelapse" separator)
             q-field(label="Onset < 12h" helper="% with onset (known or last seen well) < 12h (78%)")
@@ -45,7 +45,7 @@
             q-field(label="Onset < 4h" helper="% onset to door < 4h (74%)")
               q-slider(v-model="pLT4h" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pLT4h*100)}%`")
             q-field(label="No Exclusions" helper="% with mRS<2 and ASPECTS>6 (66%)")
-              q-slider(v-model="pInclusion" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pInclusion*100)}%`")
+              q-slider(v-model="pEarlyInclusion" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pEarlyInclusion*100)}%`")
             q-field(label="Recannalized with IVT" helper="% with resolution of deficit following IVT (5%)")
               q-slider(v-model="pRecannalized" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pRecannalized*100)}%`")       
           
@@ -53,7 +53,7 @@
             q-field(label="Onset unknown" helper="% with unknown onset and LSW > 12h (15%)")
               q-slider(v-model="pSUTO" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pSUTO*100)}%`")
             q-field(label="Onset > 12h" helper="% with known onset > 12h ago (7%)")
-              q-input(v-model="pGT12h" :max-decimals="2")
+              q-input(v-model="pGT12h" :max-decimals="2") // TODO: disable editing as calculated
             q-field(label="Favourable CTP" helper="% with favourable CTP (57%)")
               q-slider(v-model="pCTPGood" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pCTPGood*100)}%`")
         
@@ -110,7 +110,7 @@
           q-item-separator(v-show="showTable")
           q-item
             q-item-main
-              mermaid-viewer(:source="mermaidCode")
+              mermaid-viewer(:source="mmdTemplate(this)")
                 q-btn(@click="showTable = !showTable" flat icon="list" color="faded")
 
 </template>
@@ -120,6 +120,8 @@ import { QSlideTransition, QLayout, QToolbar, QToolbarTitle, QIcon, QList, QItem
 import MermaidViewer from './MermaidViewer'
 import 'quasar-extras/animate/fadeOutUp.css'
 import 'quasar-extras/animate/fadeInDown.css'
+import graphSource from './psi.hbs'
+import numeral from 'numeral'
 
 export default {
   name: 'home',
@@ -128,6 +130,8 @@ export default {
   },
   data () {
     return {
+      mmdTemplate: graphSource,
+      numeral: numeral,
       showTable: false,
       nPopulation: 10000,
       nYear: 2018,
@@ -137,11 +141,11 @@ export default {
       pIncidence: 147,
       pIschemic: 0.81,
       pLVO: 0.40,
-      pNIHSS: 0.8,
+      pModerate: 0.8,
       pKTO: 0.78,
       pSUTO: 0.15,
       pLT4h: 0.74,
-      pInclusion: 0.66,
+      pEarlyInclusion: 0.66,
       pLateInclusion: 0.25,
       pCTPGood: 0.57,
       pRecannalized: 0.05,
@@ -163,70 +167,43 @@ export default {
     nCalculatedPopulation: function () { return this.getCalculatedPopulation(this.sPopulations, this.nYear) },
     nAdults: function () { return Math.round(this.nPopulation * this.pAdults) },
     nStrokes: function () { return Math.round(this.nAdults * (this.pIncidence / 100000)) },
+
     nIschemic: function () { return Math.round(this.nStrokes * this.pIschemic) },
+    pHemorrhagic: function () { return (1.0 - this.pIschemic) },
+    nHemorrhagic: function () { return Math.round(this.nStrokes * this.pHemorrhagic) },
+
     nLVO: function () { return Math.round(this.nIschemic * this.pLVO) },
-    nModerate: function () { return Math.round(this.nLVO * this.pNIHSS) },
+    pSVO: function () { return (1.0 - this.pLVO) },
+    nSVO: function () { return Math.round(this.nIschemic * this.pSVO) },
+
+    nModerate: function () { return Math.round(this.nLVO * this.pModerate) },
+    pMild: function () { return (1.0 - this.pModerate) },
+    nMild: function () { return Math.round(this.nLVO * this.pMild) },
+
     nKTO: function () { return Math.round(this.nModerate * this.pKTO) },
-    nSUTO: function () { return Math.round(this.nModerate * this.pSUTO) },
-    pGT12h: function () { return Number(1.0 - this.pKTO - this.pSUTO).toFixed(2) },
     nLT4h: function () { return Math.round(this.nKTO * this.pLT4h) },
-    nGT4h: function () { return Math.round(this.nKTO * (1.0 - this.pLT4h)) },
+    nEarlyInclusion: function () { return Math.round(this.nLT4h * this.pEarlyInclusion) },
+    pEarlyExclusion: function () { return (1.0 - this.pEarlyInclusion) },
+    nEarlyExclusion: function () { return Math.round(this.nLT4h * this.pEarlyExclusion) },
+    nPSIReqd: function () { return Math.round(this.nEarlyInclusion * this.pNotRecannalized) },
+    pNotRecannalized: function () { return (1.0 - this.pRecannalized) },
+    nPSINotReqd: function () { return Math.round(this.nEarlyInclusion * this.pRecannalized) },
+
+    pGT4h: function () { return (1.0 - this.pLT4h) },
+    nGT4h: function () { return Math.round(this.nKTO * this.pGT4h) },
+    nSUTO: function () { return Math.round(this.nModerate * this.pSUTO) },
     nLate: function () { return (this.nGT4h + this.nSUTO) },
-    nInclusion: function () { return Math.round(this.nLT4h * this.pInclusion) },
+    pGT12h: function () { return (1.0 - this.pKTO - this.pSUTO) },
+    nTooLate: function () { return (this.nModerate - this.pGT12h) },
+
     nLateInclusion: function () { return Math.round(this.nLate * this.pLateInclusion) },
+    pLateExclusion: function () { return (1.0 - this.pLateInclusion) },
+    nLateExclusion: function () { return Math.round(this.nLate * this.pLateExclusion) },
     nCTPGood: function () { return Math.round(this.nLateInclusion * this.pCTPGood) },
-    nPSIReqd: function () { return Math.round(this.nInclusion * (1.0 - this.pRecannalized)) },
-    nTotalPSI: function () { return (this.nPSIReqd + this.nCTPGood) },
-    mermaidCode: function () {
-      return (`
-graph TD
-  Population(Population<br>N=${this.nPopulation}) -- ${this.pAdults * 100}% Adult --> Adults[Adults<br>N=${this.nAdults}]
-  Adults -- Stroke Incidence<br>${this.pIncidence}/100,000 --> Strokes[Strokes<br>N=${this.nStrokes}]
+    pCTPBad: function () { return (1.0 - this.pCTPGood) },
+    nCTPBad: function () { return Math.round(this.nLateInclusion * this.pCTPBad) },
 
-  Strokes -- Ischemic ${this.pIschemic * 100}% --> Ischemic[Ischemic<br>N=${this.nIschemic}]
-  Strokes -- Hemorrhagic ${Math.round((1.0 - this.pIschemic) * 100)}% --> ICH(Hemorrhage<br>N=${this.nStrokes - this.nIschemic})
-
-  Ischemic -- LVO ${this.pLVO * 100}% --> LVO[LVO<br>N=${this.nLVO}]
-  Ischemic -- SVO ${Math.round((1.0 - this.pLVO) * 100)}% --> SVO(SVO<br>N=${this.nIschemic - this.nLVO})
-
-  LVO -- NIHSS>=6 ${this.pNIHSS * 100}% --> Moderate[Moderate-Severe<br>N=${this.nModerate}]
-  LVO -- NIHSS< 6 ${Math.round((1.0 - this.pNIHSS) * 100)}% --> Mild(Mild<br>N=${this.nLVO - this.nModerate})
-
-  Moderate -- Onset/LSW <12h<br>${this.pKTO * 100}% --> KTO[KTO<br>${this.nKTO}]
-  Moderate -- Unknown Onset<br>${this.pSUTO * 100}% --> SUTO[SUTO<br>${this.nSUTO}]
-  Moderate -- Known Onset > 12h<br>${Math.round(this.pGT12h * 100)}% --> TooLate(Too Late<br>${this.nModerate - this.nKTO - this.nSUTO})
-
-  subgraph Early
-  KTO -- <4h ${this.pLT4h}% --> LT4h[0-4h<br>${this.nLT4h}]
-  LT4h -- No Exclusions<br>${this.pInclusion * 100}% --> Inclusion[IVT and PSI Eligible<br>${this.nInclusion}]
-  LT4h -- mRS>2, ASPECTS<6<br>${Math.round((1.0 - this.pInclusion) * 100)}% --> Ineligible[Ineligible<br>${this.nLT4h - this.nInclusion}]
-  Inclusion -- Lysis recanalized ${this.pRecannalized * 100}% --> Lysed[PSI not required<br>${this.nInclusion - this.nPSIReqd}]
-  Inclusion -- No recannalization ${Math.round((1.0 - this.pRecannalized) * 100)}% --> PSIReqd[PSI required<br>${this.nPSIReqd}]
-  end
-
-  subgraph Late
-  KTO -- >4h ${Math.round((1.0 - this.pLT4h) * 100)}% --> GT4h[4-12h <br>${this.nGT4h}]
-  GT4h-->Late[Late<br>${this.nLate}]
-  SUTO-->Late
-  Late -- No Exclusions<br>${this.pLateInclusion * 100}% --> LateInclusion[No Exclusions<br>${this.nLateInclusion}]
-  Late -- mRS>2, ASPECTS<6<br>${Math.round((1.0 - this.pLateInclusion) * 100)}% --> Exclusion[Ineligible<br>${this.nLate - this.nLateInclusion}]
-  LateInclusion -- Favourable CTP ${Math.round(this.pCTPGood * 100)}% --> CTPGood[Favourable CTP<br>${this.nCTPGood}]
-  LateInclusion -- Unfavourable CTP ${Math.round((1.0 - this.pCTPGood) * 100)}% --> CTPBad[Unfavourable CTP<br>${this.nLateInclusion - this.nCTPGood}]
-  end
-
-  CTPGood-->TotalPSI[Total PSI<br>N=${this.nTotalPSI}]
-  PSIReqd-->TotalPSI
-
-  style SVO fill:#d3d3d3,stroke:#808080
-  style Ineligible fill:#d3d3d3,stroke:#808080
-  style ICH fill:#d3d3d3,stroke:#808080
-  style CTPBad fill:#d3d3d3,stroke:#808080
-  style Exclusion fill:#d3d3d3,stroke:#808080
-  style TooLate fill:#d3d3d3,stroke:#808080
-  style Mild fill:#d3d3d3,stroke:#808080
-
-      `)
-    }
+    nTotalPSI: function () { return (this.nPSIReqd + this.nCTPGood) }
   },
   mounted () {
     this.nPopulation = this.nCalculatedPopulation
@@ -242,9 +219,9 @@ graph TD
     },
     getTotalPSI: function (sPopulations, year) {
       var x = this.getCalculatedPopulation(sPopulations, year)
-      x = x * this.pAdults * (this.pIncidence / 100000) * this.pIschemic * this.pLVO * this.pNIHSS
+      x = x * this.pAdults * (this.pIncidence / 100000) * this.pIschemic * this.pLVO * this.pModerate
 
-      var early = x * this.pKTO * this.pLT4h * this.pInclusion * (1.0 - this.pRecannalized)
+      var early = x * this.pKTO * this.pLT4h * this.pEarlyInclusion * (1.0 - this.pRecannalized)
       var gt4h = x * this.pKTO * (1.0 - this.pLT4h)
       var suto = x * this.pSUTO
       var late = (suto + gt4h) * this.pLateInclusion * this.pCTPGood
@@ -253,9 +230,9 @@ graph TD
     },
     getIVTPSI: function (sPopulations, year) {
       var x = this.getCalculatedPopulation(sPopulations, year)
-      x = x * this.pAdults * (this.pIncidence / 100000) * this.pIschemic * this.pLVO * this.pNIHSS
+      x = x * this.pAdults * (this.pIncidence / 100000) * this.pIschemic * this.pLVO * this.pModerate
 
-      var early = x * this.pKTO * this.pLT4h * this.pInclusion * (1.0 - this.pRecannalized)
+      var early = x * this.pKTO * this.pLT4h * this.pEarlyInclusion * (1.0 - this.pRecannalized)
       return Math.round(early)
     },
     getIVT: function (sPopulations, year) {

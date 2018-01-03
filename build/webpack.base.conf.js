@@ -82,8 +82,12 @@ module.exports = {
           name: 'fonts/[name].[hash:7].[ext]'
         }
       },
+      { 
+        test: /\.(handlebars|hbs)(\?.*)?$/,
+        loader: "handlebars-loader"
+      },
       {
-        test: /\.(txt|mmd)(\?.*)?$/,
+        test: /\.(txt)(\?.*)?$/,
         loader: 'raw-loader'
       },
     ]
