@@ -2,15 +2,14 @@
   div#mermaid-viewer
     .row
       q-toolbar(color="light")
-        q-toolbar-title(style="color: #777777") Flowchart
+        q-toolbar-title(style="color: #777777") {{ title }} Flowchart
         slot
-        q-btn(@click="zoomFull" flat icon="zoom_out_map" color="faded")
-        q-btn(@click="zoomDemographics" flat icon="people" color="faded")
-        q-btn(@click="zoomKnownOnset" flat icon="timer" color="faded")
-        q-btn(@click="zoomLate" flat icon="timer_off" color="faded")
+        div(v-for="(item, index) in presets")
+          q-btn(@click="presetZoomPan(index)" flat :icon="item.icon" color="faded")
+        q-btn(@click="logPanZoom") Log
         q-toggle(v-model="wheelZoom" icon="zoom_in")
     .row
-      .mermaid#mermaid
+      .mermaid(:id="'mermaid'+title")
 </template>
 
 <script>
@@ -23,12 +22,10 @@ export default {
   components: {
     QToolbar, QToolbarTitle, QIcon, QBtn, QRadio, QCheckbox, QToggle
   },
-  props: [ 'source' ],
+  props: [ 'source', 'title', 'presets', 'maxwidth' ],
   data () {
     return {
       wheelZoom: false,
-      // svgActive: false,
-      // svgHovered: false,
       graphCounter: 0,
       pan: {x: 0, y: 0},
       zoom: 0,
@@ -47,11 +44,16 @@ export default {
     mermaid.initialize({
       startOnLoad: false,
       flowchart: {
-        htmlLabels: true
+        htmlLabels: true,
+        useMaxWidth: this.maxwidth
       }
     })
   },
   methods: {
+    logPanZoom: function () {
+      console.log(this.svgChart.getZoom())
+      console.log(this.svgChart.getPan())
+    },
     svgAnimate: function (zoomTo, panTo) {
       var zoomFrom = this.svgChart.getZoom()
       var panFrom = this.svgChart.getPan()
@@ -70,25 +72,17 @@ export default {
         }
       })
     },
-    zoomFull: function () {
-      this.svgAnimate(1, {x: -5, y: 8})
-    },
-    zoomDemographics: function () {
-      this.svgAnimate(2.6, {x: -1321, y: 13})
-    },
-    zoomKnownOnset: function () {
-      this.svgAnimate(1.56, {x: 122, y: -607})
-    },
-    zoomLate: function () {
-      this.svgAnimate(1.35997, {x: -173, y: -595})
+    presetZoomPan: function (i) {
+      var x = this.presets[i]
+      this.svgAnimate(x.zoom, {x: x.x, y: x.y})
     },
     renderm: debounce(function () {
-      var mermaidNode = document.getElementById('mermaid')
+      var mermaidNode = document.getElementById('mermaid' + this.title)
       this.graphCounter = this.graphCounter + 1
-      mermaid.render('mermaid' + this.graphCounter, this.source, (svgCode, bindFunctions) => {
+      mermaid.render('mermaid' + this.title + this.graphCounter, this.source, (svgCode, bindFunctions) => {
         mermaidNode.innerHTML = svgCode
       })
-      var svgNode = document.getElementById('mermaid' + this.graphCounter)
+      var svgNode = document.getElementById('mermaid' + this.title + this.graphCounter)
       svgNode.setAttribute('width', '100%')
 
       if (this.svgChart) { // save zoom and pan states
@@ -98,7 +92,7 @@ export default {
 
       var self = this
 
-      this.svgChart = svgPanZoom('#mermaid' + this.graphCounter, {
+      this.svgChart = svgPanZoom('#mermaid' + this.title + this.graphCounter, {
         controlIconsEnabled: true,
         mouseWheelZoomEnabled: this.wheelZoom,
         beforePan: function (oldPan, newPan) {

@@ -3,7 +3,7 @@
     q-toolbar(slot="header" class="glossy")
       q-btn.flat(@click="$refs.layout.toggleLeft()")
         q-icon(name="menu")
-      q-toolbar-title PSI Number Estimator
+      q-toolbar-title Hyperacute Stroke Treatment Estimator
         div(slot="subtitle") Adapted from McKeen et al. ESJ 2017; 24(3): 319-326
 
     div(slot="left")
@@ -12,7 +12,7 @@
         q-side-link(item to="PSI")
           q-item-side(icon="school")
           q-item-main(label="PSI" sublabel="Percutaneous Clot Retrieval")
-        q-side-link(item to="IVT")
+        q-side-link(item to="IVT" @click="$refs.layout.toggleLeft()")
           q-item-side(icon="school")
           q-item-main(label="IVT" sublabel="Intravenous Thrombolysis")
         q-side-link(item to="Diversion")
@@ -38,7 +38,7 @@ import {
 } from 'quasar'
 
 export default {
-  name: 'index',
+  name: 'home',
   components: {
     QLayout,
     QToolbar,

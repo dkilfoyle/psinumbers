@@ -110,9 +110,13 @@
           q-item-separator(v-show="showTable")
           q-item
             q-item-main
-              mermaid-viewer(:source="mmdTemplate(this)")
+              mermaid-viewer(:source="mmdTemplate(this)" :maxwidth="true" title="PSI" :presets=`[
+                { label: 'Full', icon: 'zoom_out_map', zoom: 1, x: -5, y: 8 },
+                { label: 'People', icon: 'people', zoom: 2.6, x: -1321, y: 13 },
+                { label: 'Early', icon: 'timer', zoom: 1.56, x: 122, y: -607 },
+                { label: 'Late', icon: 'timer_off', zoom: 1.35997, x: -173, y: -595 }
+              ]`)
                 q-btn(@click="showTable = !showTable" flat icon="list" color="faded")
-
 </template>
 
 <script>
@@ -124,7 +128,7 @@ import graphSource from './psi.hbs'
 import numeral from 'numeral'
 
 export default {
-  name: 'home',
+  name: 'psi',
   components: {
     MermaidViewer, QSlideTransition, QLayout, QToolbar, QToolbarTitle, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCard, QCollapsible, QSelect, QRadio, QCheckbox
   },

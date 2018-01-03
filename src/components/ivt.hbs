@@ -1,0 +1,8 @@
+graph TD
+  Population(Population<br>N={{num nPopulation}}) -- {{prop pAdults}} Adult --> Adults[Adults<br>N={{num nAdults}}]
+  Adults -- Stroke Incidence<br>{{pIncidence}}/100,000 --> Strokes[Strokes<br>N={{num nStrokes}}]
+
+  Strokes -- Ischemic {{prop pIschemic}} --> Ischemic[Ischemic<br>N={{num nIschemic}}]
+  Strokes -- Hemorrhagic {{prop pHemorrhagic}} --> ICH(Hemorrhage<br>N={{num nHemorrhagic}})
+
+  Ischemic -- IVT {{prop pIVT}} --> IVT[IVT<br>N={{num nIVT}}]
