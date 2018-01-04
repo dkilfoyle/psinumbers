@@ -7,7 +7,9 @@
           q-item-separator
 
           q-collapsible(group="parameters" label="Demographics" icon="people" separator)
-            q-field(label="Populations")
+            q-field(label="Regions")
+              q-select(multiple chips v-model="sRegions" :options="Regions")
+            q-field(label="DHBs")
               q-select(multiple chips v-model="sPopulations" :options="DHBs")
             q-field(label="Population Growth" helper="Annual %")
               q-input(v-model="pPopulationGrowth")
@@ -127,6 +129,8 @@ import 'quasar-extras/animate/fadeOutUp.css'
 import 'quasar-extras/animate/fadeInDown.css'
 import graphSource from './psi.hbs'
 import numeral from 'numeral'
+import DHBs from './dhbs.js'
+import Regions from './regions.js'
 
 export default {
   name: 'psi',
@@ -141,7 +145,8 @@ export default {
       nPopulation: 10000,
       nYear: 2018,
       pPopulationGrowth: 2.5,
-      sPopulations: ['ADHB', 'CMDHB', 'WDHB'],
+      sRegions: [],
+      sPopulations: ['Auckland', 'Counties Manukau', 'Waitemata'],
       pAdults: 0.8,
       pIncidence: 147,
       pIschemic: 0.81,
@@ -155,17 +160,24 @@ export default {
       pCTPGood: 0.57,
       pRecannalized: 0.05,
       pIVT: 0.15,
-      DHBs: [
-        { label: 'ADHB', value: 'ADHB', n: 510450 },
-        { label: 'CMDHB', value: 'CMDHB', n: 541080 },
-        { label: 'WDHB', value: 'WDHB', n: 597510 },
-        { label: 'Midland', value: 'Midland', n: 853725 },
-        { label: 'Northland', value: 'Northland', n: 170560 }]
+      DHBs: DHBs,
+      Regions: Regions
     }
   },
   watch: {
     nCalculatedPopulation: function (newPop) {
       this.nPopulation = newPop
+    },
+    sRegions: function (newRegions) {
+      var self = this
+      var getRegionDHBs = function (regionName) {
+        var region = self.Regions.find(region => region.value === regionName)
+        if (region !== undefined) return region.dhbs
+      }
+      this.sPopulations = []
+      newRegions.forEach(function (region) {
+        self.sPopulations = self.sPopulations.concat(getRegionDHBs(region))
+      })
     }
   },
   computed: {

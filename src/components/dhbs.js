@@ -1,0 +1,22 @@
+module.exports = [
+  { label: 'Auckland', value: 'Auckland', n: 510450 },
+  { label: 'BOP', value: 'BOP', n: 226530 },
+  { label: 'Canterbury', value: 'Canterbury', n: 543820 },
+  { label: 'Capital and Coast', value: 'Capital and Coast', n: 307250 },
+  { label: 'Counties Manukau', value: 'Counties Manukau', n: 541080 },
+  { label: 'Hawkes Bay', value: 'Hawkes Bay', n: 161780 },
+  { label: 'Hutt Valley', value: 'Hutt Valley', n: 145310 },
+  { label: 'Lakes', value: 'Lakes', n: 105170 },
+  { label: 'MidCentral', value: 'MidCentral', n: 174340 },
+  { label: 'Nelson Marlborough', value: 'Nelson Marlborough', n: 147210 },
+  { label: 'Northland', value: 'Northland', n: 170560 },
+  { label: 'South Canterbury', value: 'South Canterbury', n: 59210 },
+  { label: 'Southern', value: 'Southern', n: 319200 },
+  { label: 'Tairawhiti', value: 'Tairawhiti', n: 47680 },
+  { label: 'Taranaki', value: 'Taranaki', n: 118110 },
+  { label: 'Waikato', value: 'Waikato', n: 400820 },
+  { label: 'Wairarapa', value: 'Wairarapa', n: 43890 },
+  { label: 'Waitemata', value: 'Waitemata', n: 597510 },
+  { label: 'West Coast', value: 'West Coast', n: 33190 },
+  { label: 'Whanganui', value: 'Whanganui', n: 62445 }
+]

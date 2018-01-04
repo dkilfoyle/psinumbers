@@ -12,12 +12,15 @@
         q-side-link(item to="PSI")
           q-item-side(icon="local_parking")
           q-item-main(label="PSI" sublabel="Percutaneous Clot Retrieval" @click="$refs.layout.toggleLeft()")
+          q-item-side(right icon="chevron_right")
         q-side-link(item to="IVT")
           q-item-side(icon="info")
           q-item-main(label="IVT" sublabel="Intravenous Thrombolysis" @click="$refs.layout.toggleLeft()")
+          q-item-side(right icon="chevron_right")
         q-side-link(item to="Diversion")
           q-item-side(icon="local_hospital")
           q-item-main(label="Diversion" sublabel="Ambulance Diversion" @click="$refs.layout.toggleLeft()")
+          q-item-side(right icon="chevron_right")
 
     router-view.layout-view
 </template>
