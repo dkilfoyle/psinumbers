@@ -49,7 +49,8 @@ export default {
       startOnLoad: false,
       flowchart: {
         htmlLabels: true,
-        useMaxWidth: this.maxwidth
+        useMaxWidth: this.maxwidth,
+        cloneCssStyles: false
       }
     })
   },
@@ -166,5 +167,15 @@ export default {
 .mermaid {
   width: 100%;
   height: 70vh;
+}
+
+.mermaid .label {
+  text-align: center;
+  padding: 15px 0;
+}
+
+.mermaid em {
+  font-style: normal;
+  font-weight: bold;
 }
 </style>
