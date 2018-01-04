@@ -7,7 +7,9 @@
           q-item-separator
 
           q-collapsible(group="parameters" label="Demographics" icon="people" separator)
-            q-field(label="Populations")
+            q-field(label="Regions")
+              q-select(multiple chips v-model="sRegions" :options="Regions")
+            q-field(label="DHBs")
               q-select(multiple chips v-model="sPopulations" :options="DHBs")
             q-field(label="Population Growth" helper="Annual %")
               q-input(v-model="pPopulationGrowth")
@@ -72,9 +74,7 @@
           q-item-separator(v-show="showTable")
           q-item
             q-item-main
-              mermaid-viewer(:source="mmdTemplate(this)" title="IVT" :maxwidth="false" :presets=`[
-                { label: 'Full', icon: 'zoom_out_map', zoom: 0.614, x: 257, y: 21 }
-              ]`)
+              mermaid-viewer(:source="mmdTemplate(this)" title="IVT" :maxwidth="false" :presets=`[]`)
                 q-btn(@click="showTable = !showTable" flat icon="list" color="faded")
                   q-tooltip Show Table
 
@@ -87,6 +87,8 @@ import 'quasar-extras/animate/fadeOutUp.css'
 import 'quasar-extras/animate/fadeInDown.css'
 import graphSource from './ivt.hbs'
 import numeral from 'numeral'
+import DHBs from './dhbs.js'
+import Regions from './regions.js'
 
 export default {
   name: 'ivt',
@@ -101,25 +103,30 @@ export default {
       nPopulation: 10000,
       nYear: 2018,
       pPopulationGrowth: 2.5,
-      sPopulations: ['ADHB', 'CMDHB', 'WDHB'],
+      sRegions: ['Metro'],
+      sPopulations: ['Auckland', 'Counties Manukau', 'Waitemata'],
       pAdults: 0.8,
       pIncidence: 147,
       pIschemic: 0.81,
       pIVT: 0.15,
-      DHBs: [
-        { label: 'ADHB', value: 'ADHB', n: 510450 },
-        { label: 'CMDHB', value: 'CMDHB', n: 541080 },
-        { label: 'WDHB', value: 'WDHB', n: 597510 },
-        { label: 'Midland', value: 'Midland', n: 853725 },
-        { label: 'Northland', value: 'Northland', n: 170560 }]
+      DHBs: DHBs,
+      Regions: Regions
     }
   },
   watch: {
     nCalculatedPopulation: function (newPop) {
       this.nPopulation = newPop
     },
-    sides: function () {
-      console.log('side change')
+    sRegions: function (newRegions) {
+      var self = this
+      var getRegionDHBs = function (regionName) {
+        var region = self.Regions.find(region => region.value === regionName)
+        if (region !== undefined) return region.dhbs
+      }
+      this.sPopulations = []
+      newRegions.forEach(function (region) {
+        self.sPopulations = self.sPopulations.concat(getRegionDHBs(region))
+      })
     }
   },
   computed: {

@@ -113,10 +113,9 @@
           q-item
             q-item-main
               mermaid-viewer(:source="mmdTemplate(this)" :maxwidth="true" title="PSI" :presets=`[
-                { label: 'Zoom: Full', icon: 'zoom_out_map', zoom: 1, x: -5, y: 8 },
-                { label: 'Zoom: Demographics', icon: 'people', zoom: 2.6, x: -1321, y: 13 },
-                { label: 'Zoom: Early presenters', icon: 'timer', zoom: 1.56, x: 122, y: -607 },
-                { label: 'Zoom: Late presenters', icon: 'timer_off', zoom: 1.35997, x: -173, y: -595 }
+                { label: 'Zoom: Demographics', icon: 'people', zoom: 4.5, x: -1454, y: -3 },
+                { label: 'Zoom: Early presenters', icon: 'timer', zoom: 2.5, x: 110, y: -621 },
+                { label: 'Zoom: Late presenters', icon: 'timer_off', zoom: 2.5, x: -311, y: -762 }
               ]`)
                 q-btn(@click="showTable = !showTable" flat icon="list" color="faded")
                   q-tooltip Show Table
@@ -145,7 +144,7 @@ export default {
       nPopulation: 10000,
       nYear: 2018,
       pPopulationGrowth: 2.5,
-      sRegions: [],
+      sRegions: ['Metro'],
       sPopulations: ['Auckland', 'Counties Manukau', 'Waitemata'],
       pAdults: 0.8,
       pIncidence: 147,

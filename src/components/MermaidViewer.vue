@@ -4,25 +4,27 @@
       q-toolbar(color="light")
         q-toolbar-title(style="color: #777777") {{ title }} Flowchart
         slot
+        q-btn(@click="fit" flat icon="zoom_out_map" color="faded")
         div(v-for="(item, index) in presets")
           q-btn(@click="presetZoomPan(index)" flat :icon="item.icon" color="faded")
             q-tooltip {{ item.label }}
         //- q-btn(@click="logPanZoom") Log
-        q-toggle(v-model="wheelZoom" icon="zoom_in")
+        q-toggle(v-model="wheelZoom" icon="zoom_in" color="faded")
           q-tooltip Zoom: Mouse
     .row
       .mermaid(:id="'mermaid'+title")
+    q-resize-observable(@resize="onResize")
 </template>
 
 <script>
-import { animate, easing, debounce, QToolbar, QToolbarTitle, QIcon, QBtn, QRadio, QCheckbox, QToggle, QTooltip } from 'quasar'
+import { animate, easing, debounce, QResizeObservable, QToolbar, QToolbarTitle, QIcon, QBtn, QRadio, QCheckbox, QToggle, QTooltip } from 'quasar'
 import mermaid from 'mermaid'
 import svgPanZoom from 'svg-pan-zoom'
 
 export default {
   name: 'mermaid-viewer',
   components: {
-    QToolbar, QToolbarTitle, QIcon, QBtn, QRadio, QCheckbox, QToggle, QTooltip
+    QResizeObservable, QToolbar, QToolbarTitle, QIcon, QBtn, QRadio, QCheckbox, QToggle, QTooltip
   },
   props: [ 'source', 'title', 'presets', 'maxwidth' ],
   data () {
@@ -52,9 +54,16 @@ export default {
     })
   },
   methods: {
+    onResize: function () {
+      console.log('resize')
+      if (this.svgChart !== undefined) {
+        this.svgChart.resize().fit().center()
+      }
+    },
     logPanZoom: function () {
       console.log(this.svgChart.getZoom())
       console.log(this.svgChart.getPan())
+      console.log(this.svgChart.getSizes())
     },
     svgAnimate: function (zoomTo, panTo) {
       var zoomFrom = this.svgChart.getZoom()
@@ -66,13 +75,20 @@ export default {
         easing: easing.standard,
         duration: 500,
         apply (pos) {
-          self.svgChart.zoom(zoomFrom + (zoomTo - zoomFrom) * pos / 100)
+          self.svgChart.zoom(zoomFrom + (zoomTo - zoomFrom) * pos / 100, true)
           self.svgChart.pan({
             x: panFrom.x + (panTo.x - panFrom.x) * pos / 100,
             y: panFrom.y + (panTo.y - panFrom.y) * pos / 100
           })
         }
       })
+    },
+    fit: function () {
+      var sizes = this.svgChart.getSizes()
+      var newScale = Math.min(sizes.width / sizes.viewBox.width, sizes.height / sizes.viewBox.height)
+      var offsetX = (sizes.width - (sizes.viewBox.width + sizes.viewBox.x * 2) * newScale) * 0.5
+      var offsetY = (sizes.height - (sizes.viewBox.height + sizes.viewBox.y * 2) * newScale) * 0.5
+      this.svgAnimate(1, {x: offsetX, y: offsetY})
     },
     presetZoomPan: function (i) {
       var x = this.presets[i]
@@ -86,6 +102,7 @@ export default {
       })
       var svgNode = document.getElementById('mermaid' + this.title + this.graphCounter)
       svgNode.setAttribute('width', '100%')
+      svgNode.setAttribute('height', '100%')
 
       if (this.svgChart) { // save zoom and pan states
         this.zoom = this.svgChart.getZoom()
@@ -137,6 +154,9 @@ export default {
         this.svgChart.zoom(this.zoom)
         this.svgChart.pan(this.pan)
       }
+      else {
+        this.svgChart.fit().center()
+      }
     }, 300)
   }
 }
@@ -145,6 +165,6 @@ export default {
 <style>
 .mermaid {
   width: 100%;
-  height: 900px;
+  height: 70vh;
 }
 </style>
