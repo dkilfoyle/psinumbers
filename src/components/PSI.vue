@@ -2,76 +2,77 @@
   .layout-padding
     .row.md-gutter
       .col-sm-4
-        q-list
-          q-list-header PSI Parameters
-          q-item-separator
+        q-scroll-area(style="height: 80vh"  :thumb-style="{ left: '0px', width: '5px' }")
+          q-list
+            q-list-header PSI Parameters. TODO: change to tabs
+            q-item-separator
 
-          q-collapsible(group="parameters" label="Demographics" icon="people" separator)
-            q-field(label="Regions")
-              q-select(multiple chips v-model="sRegions" :options="Regions")
-            q-field(label="DHBs")
-              q-select(multiple chips v-model="sPopulations" :options="DHBs")
-            q-field(label="Population Growth" helper="Annual %")
-              q-input(v-model="pPopulationGrowth")
-            q-field(label="Analysis Year")
-              q-select(v-model="nYear" :options=`[
-                { label: '2017', value: 2017 },
-                { label: '2018', value: 2018 },
-                { label: '2019', value: 2019 },
-                { label: '2020', value: 2020 },
-                { label: '2021', value: 2021 },
-                { label: '2022', value: 2022 },                                    
-              ]`)
-            q-field(label="Total Population" helper="Selected population @ selected year")
-              q-input(v-model="nPopulation")
-            q-field(label="Adults %" helper="Proportion of population >= 15y")
-              q-slider(v-model="pAdults" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pAdults*100)}%`")
-            q-field(label="Stroke Incidence" helper="Number of strokes/100,000 adults /yr")
-              q-input(v-model="pIncidence")
+            q-collapsible(group="parameters" label="Demographics" icon="people" separator)
+              q-field(label="Regions")
+                q-select(multiple chips v-model="sRegions" :options="Regions")
+              q-field(label="DHBs")
+                q-select(multiple chips v-model="sPopulations" :options="DHBs")
+              q-field(label="Population Growth" helper="Annual %")
+                q-input(v-model="pPopulationGrowth")
+              q-field(label="Analysis Year")
+                q-select(v-model="nYear" :options=`[
+                  { label: '2017', value: 2017 },
+                  { label: '2018', value: 2018 },
+                  { label: '2019', value: 2019 },
+                  { label: '2020', value: 2020 },
+                  { label: '2021', value: 2021 },
+                  { label: '2022', value: 2022 },                                    
+                ]`)
+              q-field(label="Total Population" helper="Selected population @ selected year")
+                q-input(v-model="nPopulation")
+              q-field(label="Adults %" helper="Proportion of population >= 15y")
+                q-slider(v-model="pAdults" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pAdults*100)}%`")
+              q-field(label="Stroke Incidence" helper="Number of strokes/100,000 adults /yr")
+                q-input(v-model="pIncidence")
 
-          q-collapsible(group="parameters" label="Radiology" icon="scanner" separator)
-            q-field(label="Ischemic %" helper="% of all strokes that are ischemic (81%)")
-              q-slider(v-model="pIschemic" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pIschemic*100)}%`")
-            q-field(label="LVO %" helper="% of ischemic stroke with LVO (40%)")
-              q-slider(v-model="pLVO" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pLVO*100)}%`")
+            q-collapsible(group="parameters" label="Radiology" icon="scanner" separator)
+              q-field(label="Ischemic %" helper="% of all strokes that are ischemic (81%)")
+                q-slider(v-model="pIschemic" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pIschemic*100)}%`")
+              q-field(label="LVO %" helper="% of ischemic stroke with LVO (40%)")
+                q-slider(v-model="pLVO" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pLVO*100)}%`")
 
-          q-collapsible(group="parameters" label="Clinical" icon="favorite" separator)
-            q-field(label="Moderate+ Deficit" helper="% of LVO with NIHSS >= 6 (80%)")
-              q-slider(v-model="pModerate" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pModerate*100)}%`")
+            q-collapsible(group="parameters" label="Clinical" icon="favorite" separator)
+              q-field(label="Moderate+ Deficit" helper="% of LVO with NIHSS >= 6 (80%)")
+                q-slider(v-model="pModerate" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pModerate*100)}%`")
 
-          q-collapsible(group="parameters" label="Onset Time" icon="timelapse" separator)
-            q-field(label="Onset < 12h" helper="% with onset (known or last seen well) < 12h (78%)")
-              q-slider(v-model="pKTO" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pKTO*100)}%`")
+            q-collapsible(group="parameters" label="Onset Time" icon="timelapse" separator)
+              q-field(label="Onset < 12h" helper="% with onset (known or last seen well) < 12h (78%)")
+                q-slider(v-model="pKTO" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pKTO*100)}%`")
 
-          q-collapsible(group="parameters" label="Early Presenters" icon="timer" separator)
-            q-field(label="Onset < 4h" helper="% onset to door < 4h (74%)")
-              q-slider(v-model="pLT4h" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pLT4h*100)}%`")
-            q-field(label="No Exclusions" helper="% with mRS<2 and ASPECTS>6 (66%)")
-              q-slider(v-model="pEarlyInclusion" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pEarlyInclusion*100)}%`")
-            q-field(label="Recannalized with IVT" helper="% with resolution of deficit following IVT (5%)")
-              q-slider(v-model="pRecannalized" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pRecannalized*100)}%`")       
+            q-collapsible(group="parameters" label="Early Presenters" icon="timer" separator)
+              q-field(label="Onset < 4h" helper="% onset to door < 4h (74%)")
+                q-slider(v-model="pLT4h" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pLT4h*100)}%`")
+              q-field(label="No Exclusions" helper="% with mRS<2 and ASPECTS>6 (66%)")
+                q-slider(v-model="pEarlyInclusion" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pEarlyInclusion*100)}%`")
+              q-field(label="Recannalized with IVT" helper="% with resolution of deficit following IVT (5%)")
+                q-slider(v-model="pRecannalized" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pRecannalized*100)}%`")       
+            
+            q-collapsible(group="parameters" label="Late Presenters" icon="timer_off" separator)
+              q-field(label="Onset unknown" helper="% with unknown onset and LSW > 12h (15%)")
+                q-slider(v-model="pSUTO" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pSUTO*100)}%`")
+              q-field(label="Onset > 12h" helper="% with known onset > 12h ago (7%)")
+                q-slider(v-model="pGT12h" :min="0.01" :max="1.0" :step="0.01" :decimals="2" readonly label-always :label-value="`${Math.round(pGT12h*100)}%`")
+              q-field(label="Favourable CTP" helper="% with favourable CTP (57%)")
+                q-slider(v-model="pCTPGood" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pCTPGood*100)}%`")
           
-          q-collapsible(group="parameters" label="Late Presenters" icon="timer_off" separator)
-            q-field(label="Onset unknown" helper="% with unknown onset and LSW > 12h (15%)")
-              q-slider(v-model="pSUTO" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pSUTO*100)}%`")
-            q-field(label="Onset > 12h" helper="% with known onset > 12h ago (7%)")
-              q-input(v-model="pGT12h" :max-decimals="2") // TODO: disable editing as calculated
-            q-field(label="Favourable CTP" helper="% with favourable CTP (57%)")
-              q-slider(v-model="pCTPGood" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pCTPGood*100)}%`")
-        
-        q-list
-          q-list-header Settings
-          q-item-separator
-          q-collapsible(group="settings" label="View" icon="view_quilt" separator)
-            q-field(label="Show Table" helper="Show summary table")
-              q-checkbox(v-model="showTable")
-            .row
-          q-collapsible(group="settings" label="Populations" icon="local_hospital" separator)
-            q-field(:label="dhb.label" v-for="dhb in DHBs" :key="dhb.label")
-              q-input(v-model="dhb.n" type="number")
+          q-list
+            q-list-header Settings
+            q-item-separator
+            q-collapsible(group="settings" label="View" icon="view_quilt" separator)
+              q-field(label="Show Table" helper="Show summary table")
+                q-checkbox(v-model="showTable")
+              .row
+            q-collapsible(group="settings" label="Populations" icon="local_hospital" separator)
+              q-field(:label="dhb.label" v-for="dhb in DHBs" :key="dhb.label")
+                q-input(v-model="dhb.n" type="number")
 
       .col-sm-8
-        q-list
+        q-list // TODO: qscroll area here and in IVT.vue
           q-slide-transition
             div(v-show="showTable")
               q-list-header Summary Table
@@ -122,7 +123,7 @@
 </template>
 
 <script>
-import { Toast, QTooltip, QSlideTransition, QLayout, QToolbar, QToolbarTitle, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QCard, QCollapsible, QBtn, QInput, QSlider, QField, QSelect, QRadio, QCheckbox } from 'quasar'
+import { Toast, QScrollArea, QTooltip, QSlideTransition, QLayout, QToolbar, QToolbarTitle, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QCard, QCollapsible, QBtn, QInput, QSlider, QField, QSelect, QRadio, QCheckbox } from 'quasar'
 import MermaidViewer from './MermaidViewer'
 import 'quasar-extras/animate/fadeOutUp.css'
 import 'quasar-extras/animate/fadeInDown.css'
@@ -134,7 +135,7 @@ import Regions from './regions.js'
 export default {
   name: 'psi',
   components: {
-    QTooltip, MermaidViewer, QSlideTransition, QLayout, QToolbar, QToolbarTitle, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCard, QCollapsible, QSelect, QRadio, QCheckbox
+    QScrollArea, QTooltip, MermaidViewer, QSlideTransition, QLayout, QToolbar, QToolbarTitle, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCard, QCollapsible, QSelect, QRadio, QCheckbox
   },
   data () {
     return {

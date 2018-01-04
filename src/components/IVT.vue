@@ -2,49 +2,50 @@
   .layout-padding
     .row.md-gutter
       .col-sm-4
-        q-list
-          q-list-header IVT Parameters
-          q-item-separator
+        q-scroll-area(style="height: 80vh" :thumb-style="{ left: '0px', width: '5px' }")
+          q-list
+            q-list-header IVT Parameters
+            q-item-separator
 
-          q-collapsible(group="parameters" label="Demographics" icon="people" separator)
-            q-field(label="Regions")
-              q-select(multiple chips v-model="sRegions" :options="Regions")
-            q-field(label="DHBs")
-              q-select(multiple chips v-model="sPopulations" :options="DHBs")
-            q-field(label="Population Growth" helper="Annual %")
-              q-input(v-model="pPopulationGrowth")
-            q-field(label="Analysis Year")
-              q-select(v-model="nYear" :options=`[
-                { label: '2017', value: 2017 },
-                { label: '2018', value: 2018 },
-                { label: '2019', value: 2019 },
-                { label: '2020', value: 2020 },
-                { label: '2021', value: 2021 },
-                { label: '2022', value: 2022 },                                    
-              ]`)
-            q-field(label="Total Population" helper="Selected population @ selected year")
-              q-input(v-model="nPopulation")
-            q-field(label="Adults %" helper="Proportion of population >= 15y")
-              q-slider(v-model="pAdults" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pAdults*100)}%`")
-            q-field(label="Stroke Incidence" helper="Number of strokes/100,000 adults /yr")
-              q-input(v-model="pIncidence")
+            q-collapsible(group="parameters" label="Demographics" icon="people" separator)
+              q-field(label="Regions")
+                q-select(multiple chips v-model="sRegions" :options="Regions")
+              q-field(label="DHBs")
+                q-select(multiple chips v-model="sPopulations" :options="DHBs")
+              q-field(label="Population Growth" helper="Annual %")
+                q-input(v-model="pPopulationGrowth")
+              q-field(label="Analysis Year")
+                q-select(v-model="nYear" :options=`[
+                  { label: '2017', value: 2017 },
+                  { label: '2018', value: 2018 },
+                  { label: '2019', value: 2019 },
+                  { label: '2020', value: 2020 },
+                  { label: '2021', value: 2021 },
+                  { label: '2022', value: 2022 },                                    
+                ]`)
+              q-field(label="Total Population" helper="Selected population @ selected year")
+                q-input(v-model="nPopulation")
+              q-field(label="Adults %" helper="Proportion of population >= 15y")
+                q-slider(v-model="pAdults" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pAdults*100)}%`")
+              q-field(label="Stroke Incidence" helper="Number of strokes/100,000 adults /yr")
+                q-input(v-model="pIncidence")
 
-          q-collapsible(group="parameters" label="Radiology" icon="scanner" separator)
-            q-field(label="Ischemic %" helper="% of all strokes that are ischemic (81%)")
-              q-slider(v-model="pIschemic" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pIschemic*100)}%`")
-            q-field(label="IVT %" helper="% of ischemic stroke suitable for IVT")
-              q-slider(v-model="pIVT" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pIVT*100)}%`")
+            q-collapsible(group="parameters" label="Radiology" icon="scanner" separator)
+              q-field(label="Ischemic %" helper="% of all strokes that are ischemic (81%)")
+                q-slider(v-model="pIschemic" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pIschemic*100)}%`")
+              q-field(label="IVT %" helper="% of ischemic stroke suitable for IVT")
+                q-slider(v-model="pIVT" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pIVT*100)}%`")
 
-        q-list
-          q-list-header Settings
-          q-item-separator
-          q-collapsible(group="settings" label="View" icon="view_quilt" separator)
-            q-field(label="Show Table" helper="Show summary table")
-              q-checkbox(v-model="showTable")
-            .row
-          q-collapsible(group="settings" label="Populations" icon="local_hospital" separator)
-            q-field(:label="dhb.label" v-for="dhb in DHBs" :key="dhb.label")
-              q-input(v-model="dhb.n" type="number")
+          q-list
+            q-list-header Settings
+            q-item-separator
+            q-collapsible(group="settings" label="View" icon="view_quilt" separator)
+              q-field(label="Show Table" helper="Show summary table")
+                q-checkbox(v-model="showTable")
+              .row
+            q-collapsible(group="settings" label="Populations" icon="local_hospital" separator)
+              q-field(:label="dhb.label" v-for="dhb in DHBs" :key="dhb.label")
+                q-input(v-model="dhb.n" type="number")
 
       .col-sm-8
         q-list
@@ -81,7 +82,7 @@
 </template>
 
 <script>
-import { Toast, QTooltip, QSlideTransition, QLayout, QToolbar, QToolbarTitle, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QCard, QCollapsible, QBtn, QInput, QSlider, QField, QSelect, QRadio, QCheckbox } from 'quasar'
+import { QScrollArea, Toast, QTooltip, QSlideTransition, QLayout, QToolbar, QToolbarTitle, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QCard, QCollapsible, QBtn, QInput, QSlider, QField, QSelect, QRadio, QCheckbox } from 'quasar'
 import MermaidViewer from './MermaidViewer'
 import 'quasar-extras/animate/fadeOutUp.css'
 import 'quasar-extras/animate/fadeInDown.css'
@@ -93,7 +94,7 @@ import Regions from './regions.js'
 export default {
   name: 'ivt',
   components: {
-    QTooltip, MermaidViewer, QSlideTransition, QLayout, QToolbar, QToolbarTitle, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCard, QCollapsible, QSelect, QRadio, QCheckbox
+    QScrollArea, QTooltip, MermaidViewer, QSlideTransition, QLayout, QToolbar, QToolbarTitle, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCard, QCollapsible, QSelect, QRadio, QCheckbox
   },
   data () {
     return {
