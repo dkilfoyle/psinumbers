@@ -63,10 +63,13 @@
           q-list
             q-list-header Settings
             q-item-separator
-            q-collapsible(group="settings" label="View" icon="view_quilt" separator)
-              q-field(label="Show Table" helper="Show summary table")
-                q-checkbox(v-model="showTable")
-              .row
+            q-collapsible(group="settings" label="Table" icon="view_quilt" separator)
+              q-field(label="IVT and PSI" helper="Patients treated with both IVT and PSI")
+                q-checkbox(v-model="bIVTandPSI")
+              q-field(label="PSI per 24h day" helper="PSI cases per 24h day")
+                q-checkbox(v-model="bPSIperDay")
+              q-field(label="PSI per Night" helper="PSI cases per overnight")
+                q-checkbox(v-model="bPSIperNight")
             q-collapsible(group="settings" label="Populations" icon="local_hospital" separator)
               q-field(:label="dhb.label" v-for="dhb in DHBs" :key="dhb.label")
                 q-input(v-model="dhb.n" type="number")
@@ -75,41 +78,51 @@
         q-list // TODO: qscroll area here and in IVT.vue
           q-slide-transition
             div(v-show="showTable")
-              q-list-header Summary Table
+              q-list-header Summary Tables
               q-item-separator
               q-item( key="tableItem")
                 q-item-main
-                  table.q-table
+                  table.q-table.horizontal-separator
                     thead
                       tr
                         th
-                        th 2018
-                        th 2019
-                        th 2020
-                        th 2021
-                        th 2022
+                        th(v-for="year in tableYears") {{ year }}
                     tbody
+                      tr(v-if="bIVTandPSI")
+                        th IVT and PSI
+                      tr(v-if="bIVTandPSI" v-for="dhb in sPopulations")
+                        td {{ dhb }}
+                        td(v-for="year in tableYears") {{ getIVTPSI([dhb], year) }}
+                      tr(v-if="bIVTandPSI")
+                        td Total
+                        td(v-for="year in tableYears") {{ getIVTPSI(sPopulations, year) }}
+                      
                       tr
-                        td IVT
-                        td {{ getIVT(sPopulations, 2018) }}
-                        td {{ getIVT(sPopulations, 2019) }}
-                        td {{ getIVT(sPopulations, 2020) }}
-                        td {{ getIVT(sPopulations, 2021) }}
-                        td {{ getIVT(sPopulations, 2022) }}    
+                        th PSI (+/- IVT)
+                      tr(v-for="dhb in sPopulations")
+                        td {{ dhb }}
+                        td(v-for="year in tableYears") {{ getTotalPSI([dhb], year) }}
                       tr
-                        td IVT and PSI
-                        td {{ getIVTPSI(sPopulations, 2018) }}
-                        td {{ getIVTPSI(sPopulations, 2019) }}
-                        td {{ getIVTPSI(sPopulations, 2020) }}
-                        td {{ getIVTPSI(sPopulations, 2021) }}
-                        td {{ getIVTPSI(sPopulations, 2022) }}                          
-                      tr
-                        td Total PSI
-                        td {{ getTotalPSI(sPopulations, 2018) }}
-                        td {{ getTotalPSI(sPopulations, 2019) }}
-                        td {{ getTotalPSI(sPopulations, 2020) }}
-                        td {{ getTotalPSI(sPopulations, 2021) }}
-                        td {{ getTotalPSI(sPopulations, 2022) }}
+                        td Total
+                        td(v-for="year in tableYears") {{ getTotalPSI(sPopulations, year) }}
+                      
+                      tr(v-if="bPSIperDay")
+                        th PSI/Day
+                      tr(v-if="bPSIperDay" v-for="dhb in sPopulations")
+                        td {{ dhb }}
+                        td(v-for="year in tableYears") {{ getTotalPSI([dhb], year) }}
+                      tr(v-if="bPSIperDay")
+                        td Total
+                        td(v-for="year in tableYears") {{ getTotalPSI(sPopulations, year) }}
+                      
+                      tr(v-if="bPSIperNight")
+                        th PSI/Night
+                      tr(v-if="bPSIperNight" v-for="dhb in sPopulations")
+                        td {{ dhb }}
+                        td(v-for="year in tableYears") {{ getTotalPSI([dhb], year) }}
+                      tr(v-if="bPSIperNight")
+                        td Total
+                        td(v-for="year in tableYears") {{ getTotalPSI(sPopulations, year) }}
           q-item-separator(v-show="showTable")
           q-item
             q-item-main
@@ -142,6 +155,10 @@ export default {
       mmdTemplate: graphSource,
       numeral: numeral,
       showTable: false,
+      bIVTandPSI: false,
+      bPSIperDay: true,
+      bPSIperNight: true,
+      tableYears: [2018, 2019, 2020, 2021, 2022],
       nPopulation: 10000,
       nYear: 2018,
       pPopulationGrowth: 2.5,
@@ -256,11 +273,6 @@ export default {
 
       var early = x * this.pKTO * this.pLT4h * this.pEarlyInclusion * (1.0 - this.pRecannalized)
       return Math.round(early)
-    },
-    getIVT: function (sPopulations, year) {
-      var x = this.getCalculatedPopulation(sPopulations, year)
-      x = x * this.pAdults * (this.pIncidence / 100000) * this.pIschemic * this.pIVT
-      return Math.round(x)
     }
   }
 }
