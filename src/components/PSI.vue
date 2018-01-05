@@ -2,9 +2,9 @@
   .layout-padding
     .row.md-gutter
       .col-sm-4
-        q-scroll-area(style="height: 80vh"  :thumb-style="{ left: '0px', width: '5px' }")
+        q-scroll-area(style="height: calc(100vh - 114px);"  :thumb-style="{ left: '0px', width: '5px' }")
           q-list
-            q-list-header PSI Parameters. TODO: change to tabs
+            q-list-header PSI Parameters
             q-item-separator
 
             q-collapsible(group="parameters" label="Demographics" icon="people" separator)
@@ -60,6 +60,10 @@
               q-field(label="Favourable CTP" helper="% with favourable CTP (57%)")
                 q-slider(v-model="pCTPGood" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pCTPGood*100)}%`")
           
+            q-collapsible(group="parameters" label="Time of Day" icon="access_time" separator)
+              q-field(label="Overnight" helper="% presenting overnight")
+                q-slider(v-model="pOvernight" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pOvernight*100)}%`")
+          
           q-list
             q-list-header Settings
             q-item-separator
@@ -75,68 +79,63 @@
                 q-input(v-model="dhb.n" type="number")
 
       .col-sm-8
-        q-list // TODO: qscroll area here and in IVT.vue
-          q-slide-transition
-            div(v-show="showTable")
-              q-list-header Summary Tables
-              q-item-separator
-              q-item( key="tableItem")
-                q-item-main
-                  table.q-table.horizontal-separator
-                    thead
-                      tr
-                        th
-                        th(v-for="year in tableYears") {{ year }}
-                    tbody
-                      tr(v-if="bIVTandPSI")
-                        th IVT and PSI
-                      tr(v-if="bIVTandPSI" v-for="dhb in sPopulations")
-                        td {{ dhb }}
-                        td(v-for="year in tableYears") {{ getIVTPSI([dhb], year) }}
-                      tr(v-if="bIVTandPSI")
-                        td Total
-                        td(v-for="year in tableYears") {{ getIVTPSI(sPopulations, year) }}
-                      
-                      tr
-                        th PSI (+/- IVT)
-                      tr(v-for="dhb in sPopulations")
-                        td {{ dhb }}
-                        td(v-for="year in tableYears") {{ getTotalPSI([dhb], year) }}
-                      tr
-                        td Total
-                        td(v-for="year in tableYears") {{ getTotalPSI(sPopulations, year) }}
-                      
-                      tr(v-if="bPSIperDay")
-                        th PSI/Day
-                      tr(v-if="bPSIperDay" v-for="dhb in sPopulations")
-                        td {{ dhb }}
-                        td(v-for="year in tableYears") {{ getTotalPSI([dhb], year) }}
-                      tr(v-if="bPSIperDay")
-                        td Total
-                        td(v-for="year in tableYears") {{ getTotalPSI(sPopulations, year) }}
-                      
-                      tr(v-if="bPSIperNight")
-                        th PSI/Night
-                      tr(v-if="bPSIperNight" v-for="dhb in sPopulations")
-                        td {{ dhb }}
-                        td(v-for="year in tableYears") {{ getTotalPSI([dhb], year) }}
-                      tr(v-if="bPSIperNight")
-                        td Total
-                        td(v-for="year in tableYears") {{ getTotalPSI(sPopulations, year) }}
-          q-item-separator(v-show="showTable")
-          q-item
-            q-item-main
-              mermaid-viewer(:source="mmdTemplate(this)" :maxwidth="true" title="PSI" :presets=`[
-                { label: 'Zoom: Demographics', icon: 'people', zoom: 4.5, x: -1454, y: -3 },
-                { label: 'Zoom: Early presenters', icon: 'timer', zoom: 2.5, x: 110, y: -621 },
-                { label: 'Zoom: Late presenters', icon: 'timer_off', zoom: 2.5, x: -311, y: -762 }
-              ]`)
-                q-btn(@click="showTable = !showTable" flat icon="list" color="faded")
-                  q-tooltip Show Table
+        q-tabs(color="secondary")
+          q-tab(default name="graph" slot="title" label="Flowchart")
+          q-tab(name="table" slot="title" label="Table")
+          q-tab-pane(name="table")
+            q-scroll-area(style="height: 73vh; padding:10px;"  :thumb-style="{ left: '0px', width: '5px' }")
+              .row.justify-center
+                table.q-table.horizontal-separator
+                  thead
+                    tr
+                      th
+                      th(v-for="year in tableYears") {{ year }}
+                  tbody
+                    tr(v-if="bIVTandPSI")
+                      th IVT and PSI
+                    tr(v-if="bIVTandPSI" v-for="dhb in sPopulations")
+                      td {{ dhb }}
+                      td(v-for="year in tableYears") {{ getIVTPSI([dhb], year) }}
+                    tr(v-if="bIVTandPSI")
+                      td Total
+                      td(v-for="year in tableYears") {{ getIVTPSI(sPopulations, year) }}
+                    
+                    tr
+                      th PSI (+/- IVT)
+                    tr(v-for="dhb in sPopulations")
+                      td {{ dhb }}
+                      td(v-for="year in tableYears") {{ getTotalPSI([dhb], year) }}
+                    tr
+                      td Total
+                      td(v-for="year in tableYears") {{ getTotalPSI(sPopulations, year) }}
+                    
+                    tr(v-if="bPSIperDay")
+                      th PSI/Day
+                    tr(v-if="bPSIperDay" v-for="dhb in sPopulations")
+                      td {{ dhb }}
+                      td(v-for="year in tableYears") {{ getPSIperDay([dhb], year) }}
+                    tr(v-if="bPSIperDay")
+                      td Total
+                      td(v-for="year in tableYears") {{ getPSIperDay(sPopulations, year) }}
+                    
+                    tr(v-if="bPSIperNight")
+                      th PSI/Night
+                    tr(v-if="bPSIperNight" v-for="dhb in sPopulations")
+                      td {{ dhb }}
+                      td(v-for="year in tableYears") {{ getPSIperNight([dhb], year) }}
+                    tr(v-if="bPSIperNight")
+                      td Total
+                      td(v-for="year in tableYears") {{ getPSIperNight(sPopulations, year) }}          
+          q-tab-pane(name="graph")
+            mermaid-viewer(:source="mmdTemplate(this)" :maxwidth="true" title="PSI" :presets=`[
+              { label: 'Zoom: Demographics', icon: 'people', zoom: 4.5, x: -1454, y: -3 },
+              { label: 'Zoom: Early presenters', icon: 'timer', zoom: 2.5, x: 110, y: -621 },
+              { label: 'Zoom: Late presenters', icon: 'timer_off', zoom: 2.5, x: -311, y: -762 }
+            ]`)
 </template>
 
 <script>
-import { Toast, QScrollArea, QTooltip, QSlideTransition, QLayout, QToolbar, QToolbarTitle, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QCard, QCollapsible, QBtn, QInput, QSlider, QField, QSelect, QRadio, QCheckbox } from 'quasar'
+import { Toast, QTabs, QTabPane, QTab, QScrollArea, QTooltip, QSlideTransition, QLayout, QToolbar, QToolbarTitle, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QCard, QCollapsible, QBtn, QInput, QSlider, QField, QSelect, QRadio, QCheckbox } from 'quasar'
 import MermaidViewer from './MermaidViewer'
 import 'quasar-extras/animate/fadeOutUp.css'
 import 'quasar-extras/animate/fadeInDown.css'
@@ -148,7 +147,7 @@ import Regions from './regions.js'
 export default {
   name: 'psi',
   components: {
-    QScrollArea, QTooltip, MermaidViewer, QSlideTransition, QLayout, QToolbar, QToolbarTitle, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCard, QCollapsible, QSelect, QRadio, QCheckbox
+    QTabs, QTabPane, QTab, QScrollArea, QTooltip, MermaidViewer, QSlideTransition, QLayout, QToolbar, QToolbarTitle, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCard, QCollapsible, QSelect, QRadio, QCheckbox
   },
   data () {
     return {
@@ -176,7 +175,7 @@ export default {
       pLateInclusion: 0.25,
       pCTPGood: 0.57,
       pRecannalized: 0.05,
-      pIVT: 0.15,
+      pOvernight: 0.10, // TODO: check this
       DHBs: DHBs,
       Regions: Regions
     }
@@ -267,6 +266,12 @@ export default {
 
       return Math.round(early + late)
     },
+    getPSIperDay: function (sPopulations, year) {
+      return this.numeral(this.getTotalPSI(sPopulations, year) / 365.0).format('0.0')
+    },
+    getPSIperNight: function (sPopulations, year) {
+      return this.numeral(this.getTotalPSI(sPopulations, year) / 365.0 * this.pOvernight).format('0.0')
+    },
     getIVTPSI: function (sPopulations, year) {
       var x = this.getCalculatedPopulation(sPopulations, year)
       x = x * this.pAdults * (this.pIncidence / 100000) * this.pIschemic * this.pLVO * this.pModerate
@@ -279,4 +284,7 @@ export default {
 </script>
 
 <style>
+.layout-padding {
+  padding: 2em 2em;
+}
 </style>

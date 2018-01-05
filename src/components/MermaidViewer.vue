@@ -1,30 +1,31 @@
 <template lang="pug">
   div#mermaid-viewer
-    .row
-      q-toolbar(color="light")
-        q-toolbar-title(style="color: #777777") {{ title }} Flowchart
-        slot
-        q-btn(@click="fit" flat icon="zoom_out_map" color="faded")
-        div(v-for="(item, index) in presets")
-          q-btn(@click="presetZoomPan(index)" flat :icon="item.icon" color="faded")
-            q-tooltip {{ item.label }}
-        //- q-btn(@click="logPanZoom") Log
-        q-toggle(v-model="wheelZoom" icon="zoom_in" color="faded")
-          q-tooltip Zoom: Mouse
-    .row
-      .mermaid(:id="'mermaid'+title")
+    q-btn(color="tertiary" small)
+      q-icon(name="zoom_in") 
+      q-popover(ref="zoomPopover")
+        .div
+          q-btn(flat @click="fit(), $refs.zoomPopover.close()")
+            q-icon(name="zoom_out_map")
+            q-tooltip(anchor="center right" self="center left" :offset="[10, 10]") Zoom out full
+          div(v-for="(item, index) in presets")
+            q-btn(@click="presetZoomPan(index), $refs.zoomPopover.close()" flat color="faded")
+              q-icon(:name="item.icon")
+              q-tooltip(anchor="center right" self="center left" :offset="[10, 10]") {{ item.label }}
+    .mermaid(:id="'mermaid'+title")
     q-resize-observable(@resize="onResize")
+          //- q-toggle(v-model="wheelZoom" icon="zoom_in" color="faded")
+          //-   q-tooltip Zoom: Mouse
 </template>
 
 <script>
-import { animate, easing, debounce, QResizeObservable, QToolbar, QToolbarTitle, QIcon, QBtn, QRadio, QCheckbox, QToggle, QTooltip } from 'quasar'
+import { animate, easing, debounce, QFixedPosition, QPopover, QResizeObservable, QToolbar, QToolbarTitle, QIcon, QBtn, QRadio, QCheckbox, QToggle, QTooltip } from 'quasar'
 import mermaid from 'mermaid'
 import svgPanZoom from 'svg-pan-zoom'
 
 export default {
   name: 'mermaid-viewer',
   components: {
-    QResizeObservable, QToolbar, QToolbarTitle, QIcon, QBtn, QRadio, QCheckbox, QToggle, QTooltip
+    QFixedPosition, QPopover, QResizeObservable, QToolbar, QToolbarTitle, QIcon, QBtn, QRadio, QCheckbox, QToggle, QTooltip
   },
   props: [ 'source', 'title', 'presets', 'maxwidth' ],
   data () {
@@ -49,10 +50,10 @@ export default {
       startOnLoad: false,
       flowchart: {
         htmlLabels: true,
-        useMaxWidth: this.maxwidth,
-        cloneCssStyles: false
+        useMaxWidth: this.maxwidth
       }
     })
+    this.renderm()
   },
   methods: {
     onResize: function () {
@@ -96,6 +97,7 @@ export default {
       this.svgAnimate(x.zoom, {x: x.x, y: x.y})
     },
     renderm: debounce(function () {
+      console.log('renderm')
       var mermaidNode = document.getElementById('mermaid' + this.title)
       this.graphCounter = this.graphCounter + 1
       mermaid.render('mermaid' + this.title + this.graphCounter, this.source, (svgCode, bindFunctions) => {
@@ -166,7 +168,7 @@ export default {
 <style>
 .mermaid {
   width: 100%;
-  height: 70vh;
+  height: 73vh; 
 }
 
 .mermaid .label {
