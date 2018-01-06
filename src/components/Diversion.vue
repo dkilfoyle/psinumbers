@@ -2,7 +2,7 @@
   my-layout
     div(slot="settings")
       q-list
-        q-list-header IVT Parameters
+        q-list-header Diversion Parameters
         q-item-separator
 
         q-collapsible(group="parameters" label="Demographics" icon="people" separator)
@@ -76,6 +76,7 @@ import { Toast, QTooltip, QIcon, QList, QItem, QItemMain, QListHeader, QItemSepa
 import MyLayout from './MyLayout'
 import PopulationSelector from './PopulationSelector'
 import MermaidViewer from './MermaidViewer'
+
 import graphSource from './ivt.hbs'
 import numeral from 'numeral'
 import DHBs from './dhbs.js'
@@ -97,8 +98,6 @@ export default {
       pIncidence: 147,
       pIschemic: 0.81,
       pIVT: 0.15,
-      pOvernight: 0.18,
-      pAfterhours: 0.61,
       DHBs: DHBs
     }
   },

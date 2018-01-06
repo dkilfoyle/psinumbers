@@ -6,8 +6,8 @@
       .col-8
         h3 Hyperacute Stroke Intervention Estimator
     .row
-      q-card.full-width
-        q-card-main
+      q-card.full-width(color="secondary")
+        q-card-main(style="text-align: center;")
           | Select the intervention of interest from the menu at left.
 </template>
 

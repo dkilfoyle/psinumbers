@@ -1,168 +1,139 @@
 <template lang="pug">
-  .layout-padding
-    .row.md-gutter
-      .col-sm-4
-        q-scroll-area(style="height: calc(100vh - 114px);"  :thumb-style="{ left: '0px', width: '5px' }")
-          q-list
-            q-list-header PSI Parameters
-            q-item-separator
+  my-layout
+    div(slot="settings")
+      q-list
+        q-list-header PSI Parameters
+        q-item-separator
 
-            q-collapsible(group="parameters" label="Demographics" icon="people" separator)
-              q-field(label="Regions")
-                q-select(multiple chips v-model="sRegions" :options="Regions")
-              q-field(label="DHBs")
-                q-select(multiple chips v-model="sPopulations" :options="DHBs")
-              q-field(label="Population Growth" helper="Annual %")
-                q-input(v-model="pPopulationGrowth")
-              q-field(label="Analysis Year")
-                q-select(v-model="nYear" :options=`[
-                  { label: '2017', value: 2017 },
-                  { label: '2018', value: 2018 },
-                  { label: '2019', value: 2019 },
-                  { label: '2020', value: 2020 },
-                  { label: '2021', value: 2021 },
-                  { label: '2022', value: 2022 },                                    
-                ]`)
-              q-field(label="Total Population" helper="Selected population @ selected year")
-                q-input(v-model="nPopulation")
-              q-field(label="Adults %" helper="Proportion of population >= 15y")
-                q-slider(v-model="pAdults" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pAdults*100)}%`")
-              q-field(label="Stroke Incidence" helper="Number of strokes/100,000 adults /yr")
-                q-input(v-model="pIncidence")
+        q-collapsible(group="parameters" label="Demographics" icon="people" separator)
+          population-selector(v-model="population")
+          q-field(label="Adults %" helper="Proportion of population >= 15y")
+            q-slider(v-model="pAdults" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pAdults*100)}%`")
+          q-field(label="Stroke Incidence" helper="Number of strokes/100,000 adults /yr")
+            q-input(v-model="pIncidence")
 
-            q-collapsible(group="parameters" label="Radiology" icon="scanner" separator)
-              q-field(label="Ischemic %" helper="% of all strokes that are ischemic (81%)")
-                q-slider(v-model="pIschemic" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pIschemic*100)}%`")
-              q-field(label="LVO %" helper="% of ischemic stroke with LVO (40%)")
-                q-slider(v-model="pLVO" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pLVO*100)}%`")
+        q-collapsible(group="parameters" label="Radiology" icon="scanner" separator)
+          q-field(label="Ischemic %" helper="% of all strokes that are ischemic (81%)")
+            q-slider(v-model="pIschemic" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pIschemic*100)}%`")
+          q-field(label="LVO %" helper="% of ischemic stroke with LVO (40%)")
+            q-slider(v-model="pLVO" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pLVO*100)}%`")
 
-            q-collapsible(group="parameters" label="Clinical" icon="favorite" separator)
-              q-field(label="Moderate+ Deficit" helper="% of LVO with NIHSS >= 6 (80%)")
-                q-slider(v-model="pModerate" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pModerate*100)}%`")
+        q-collapsible(group="parameters" label="Clinical" icon="favorite" separator)
+          q-field(label="Moderate+ Deficit" helper="% of LVO with NIHSS >= 6 (80%)")
+            q-slider(v-model="pModerate" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pModerate*100)}%`")
 
-            q-collapsible(group="parameters" label="Onset Time" icon="timelapse" separator)
-              q-field(label="Onset < 12h" helper="% with onset (known or last seen well) < 12h (78%)")
-                q-slider(v-model="pKTO" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pKTO*100)}%`")
+        q-collapsible(group="parameters" label="Onset Time" icon="timelapse" separator)
+          q-field(label="Onset < 12h" helper="% with onset (known or last seen well) < 12h (78%)")
+            q-slider(v-model="pKTO" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pKTO*100)}%`")
 
-            q-collapsible(group="parameters" label="Early Presenters" icon="timer" separator)
-              q-field(label="Onset < 4h" helper="% onset to door < 4h (74%)")
-                q-slider(v-model="pLT4h" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pLT4h*100)}%`")
-              q-field(label="No Exclusions" helper="% with mRS<2 and ASPECTS>6 (66%)")
-                q-slider(v-model="pEarlyInclusion" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pEarlyInclusion*100)}%`")
-              q-field(label="Recannalized with IVT" helper="% with resolution of deficit following IVT (5%)")
-                q-slider(v-model="pRecannalized" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pRecannalized*100)}%`")       
-            
-            q-collapsible(group="parameters" label="Late Presenters" icon="timer_off" separator)
-              q-field(label="Onset unknown" helper="% with unknown onset and LSW > 12h (15%)")
-                q-slider(v-model="pSUTO" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pSUTO*100)}%`")
-              q-field(label="Onset > 12h" helper="% with known onset > 12h ago (7%)")
-                q-slider(v-model="pGT12h" :min="0.01" :max="1.0" :step="0.01" :decimals="2" readonly label-always :label-value="`${Math.round(pGT12h*100)}%`")
-              q-field(label="Favourable CTP" helper="% with favourable CTP (57%)")
-                q-slider(v-model="pCTPGood" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pCTPGood*100)}%`")
+        q-collapsible(group="parameters" label="Early Presenters" icon="timer" separator)
+          q-field(label="Onset < 4h" helper="% onset to door < 4h (74%)")
+            q-slider(v-model="pLT4h" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pLT4h*100)}%`")
+          q-field(label="No Exclusions" helper="% with mRS<2 and ASPECTS>6 (66%)")
+            q-slider(v-model="pEarlyInclusion" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pEarlyInclusion*100)}%`")
+          q-field(label="Recannalized with IVT" helper="% with resolution of deficit following IVT (5%)")
+            q-slider(v-model="pRecannalized" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pRecannalized*100)}%`")       
+        
+        q-collapsible(group="parameters" label="Late Presenters" icon="timer_off" separator)
+          q-field(label="Onset unknown" helper="% with unknown onset and LSW > 12h (15%)")
+            q-slider(v-model="pSUTO" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pSUTO*100)}%`")
+          q-field(label="Onset > 12h" helper="% with known onset > 12h ago (7%)")
+            q-slider(v-model="pGT12h" :min="0.01" :max="1.0" :step="0.01" :decimals="2" readonly label-always :label-value="`${Math.round(pGT12h*100)}%`")
+          q-field(label="Favourable CTP" helper="% with favourable CTP (57%)")
+            q-slider(v-model="pCTPGood" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pCTPGood*100)}%`")
+      
+        q-collapsible(group="parameters" label="Time of Day" icon="access_time" separator)
+          q-field(label="Overnight" helper="% presenting overnight")
+            q-slider(v-model="pOvernight" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pOvernight*100)}%`")
+      
+      q-list
+        q-list-header Settings
+        q-item-separator
+        q-collapsible(group="settings" label="Table" icon="view_quilt" separator)
+          q-field(label="IVT and PSI" helper="Patients treated with both IVT and PSI")
+            q-checkbox(v-model="bIVTandPSI")
+          q-field(label="PSI per 24h day" helper="PSI cases per 24h day")
+            q-checkbox(v-model="bPSIperDay")
+          q-field(label="PSI per Night" helper="PSI cases per overnight")
+            q-checkbox(v-model="bPSIperNight")
+        q-collapsible(group="settings" label="Populations" icon="local_hospital" separator)
+          q-field(:label="dhb.label" v-for="dhb in DHBs" :key="dhb.label")
+            q-input(v-model="dhb.n" type="number")
+
+    div(slot="table")
+      table.q-table.horizontal-separator
+        thead
+          tr
+            th
+            th(v-for="year in tableYears") {{ year }}
+        tbody
+          tr(v-if="bIVTandPSI")
+            th IVT and PSI
+          tr(v-if="bIVTandPSI" v-for="dhb in population.dhbs")
+            td {{ dhb }}
+            td(v-for="year in tableYears") {{ getIVTPSI([dhb], year) }}
+          tr(v-if="bIVTandPSI")
+            td Total
+            td(v-for="year in tableYears") {{ getIVTPSI(population.dhbs, year) }}
           
-            q-collapsible(group="parameters" label="Time of Day" icon="access_time" separator)
-              q-field(label="Overnight" helper="% presenting overnight")
-                q-slider(v-model="pOvernight" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pOvernight*100)}%`")
+          tr
+            th PSI (+/- IVT)
+          tr(v-for="dhb in population.dhbs")
+            td {{ dhb }}
+            td(v-for="year in tableYears") {{ getTotalPSI([dhb], year) }}
+          tr
+            td Total
+            td(v-for="year in tableYears") {{ getTotalPSI(population.dhbs, year) }}
           
-          q-list
-            q-list-header Settings
-            q-item-separator
-            q-collapsible(group="settings" label="Table" icon="view_quilt" separator)
-              q-field(label="IVT and PSI" helper="Patients treated with both IVT and PSI")
-                q-checkbox(v-model="bIVTandPSI")
-              q-field(label="PSI per 24h day" helper="PSI cases per 24h day")
-                q-checkbox(v-model="bPSIperDay")
-              q-field(label="PSI per Night" helper="PSI cases per overnight")
-                q-checkbox(v-model="bPSIperNight")
-            q-collapsible(group="settings" label="Populations" icon="local_hospital" separator)
-              q-field(:label="dhb.label" v-for="dhb in DHBs" :key="dhb.label")
-                q-input(v-model="dhb.n" type="number")
+          tr(v-if="bPSIperDay")
+            th PSI/Day
+          tr(v-if="bPSIperDay" v-for="dhb in population.dhbs")
+            td {{ dhb }}
+            td(v-for="year in tableYears") {{ getPSIperDay([dhb], year) }}
+          tr(v-if="bPSIperDay")
+            td Total
+            td(v-for="year in tableYears") {{ getPSIperDay(population.dhbs, year) }}
+          
+          tr(v-if="bPSIperNight")
+            th PSI/Night
+          tr(v-if="bPSIperNight" v-for="dhb in population.dhbs")
+            td {{ dhb }}
+            td(v-for="year in tableYears") {{ getPSIperNight([dhb], year) }}
+          tr(v-if="bPSIperNight")
+            td Total
+            td(v-for="year in tableYears") {{ getPSIperNight(population.dhbs, year) }}
 
-      .col-sm-8
-        q-tabs(color="secondary")
-          q-tab(default name="graph" slot="title" label="Flowchart")
-          q-tab(name="table" slot="title" label="Table")
-          q-tab-pane(name="table")
-            q-scroll-area(style="height: 73vh; padding:10px;"  :thumb-style="{ left: '0px', width: '5px' }")
-              .row.justify-center
-                table.q-table.horizontal-separator
-                  thead
-                    tr
-                      th
-                      th(v-for="year in tableYears") {{ year }}
-                  tbody
-                    tr(v-if="bIVTandPSI")
-                      th IVT and PSI
-                    tr(v-if="bIVTandPSI" v-for="dhb in sPopulations")
-                      td {{ dhb }}
-                      td(v-for="year in tableYears") {{ getIVTPSI([dhb], year) }}
-                    tr(v-if="bIVTandPSI")
-                      td Total
-                      td(v-for="year in tableYears") {{ getIVTPSI(sPopulations, year) }}
-                    
-                    tr
-                      th PSI (+/- IVT)
-                    tr(v-for="dhb in sPopulations")
-                      td {{ dhb }}
-                      td(v-for="year in tableYears") {{ getTotalPSI([dhb], year) }}
-                    tr
-                      td Total
-                      td(v-for="year in tableYears") {{ getTotalPSI(sPopulations, year) }}
-                    
-                    tr(v-if="bPSIperDay")
-                      th PSI/Day
-                    tr(v-if="bPSIperDay" v-for="dhb in sPopulations")
-                      td {{ dhb }}
-                      td(v-for="year in tableYears") {{ getPSIperDay([dhb], year) }}
-                    tr(v-if="bPSIperDay")
-                      td Total
-                      td(v-for="year in tableYears") {{ getPSIperDay(sPopulations, year) }}
-                    
-                    tr(v-if="bPSIperNight")
-                      th PSI/Night
-                    tr(v-if="bPSIperNight" v-for="dhb in sPopulations")
-                      td {{ dhb }}
-                      td(v-for="year in tableYears") {{ getPSIperNight([dhb], year) }}
-                    tr(v-if="bPSIperNight")
-                      td Total
-                      td(v-for="year in tableYears") {{ getPSIperNight(sPopulations, year) }}          
-          q-tab-pane(name="graph")
-            mermaid-viewer(:source="mmdTemplate(this)" :maxwidth="true" title="PSI" :presets=`[
-              { label: 'Zoom: Demographics', icon: 'people', zoom: 4.5, x: -1454, y: -3 },
-              { label: 'Zoom: Early presenters', icon: 'timer', zoom: 2.5, x: 110, y: -621 },
-              { label: 'Zoom: Late presenters', icon: 'timer_off', zoom: 2.5, x: -311, y: -762 }
-            ]`)
+    div(slot="graph")         
+      mermaid-viewer(:source="mmdTemplate(this)" :maxwidth="true" title="PSI" :presets=`[
+        { label: 'Zoom: Demographics', icon: 'people', zoom: 4.5, x: -1454, y: -3 },
+        { label: 'Zoom: Early presenters', icon: 'timer', zoom: 2.5, x: 110, y: -621 },
+        { label: 'Zoom: Late presenters', icon: 'timer_off', zoom: 2.5, x: -311, y: -762 }
+      ]`)
 </template>
 
 <script>
-import { Toast, QTabs, QTabPane, QTab, QScrollArea, QTooltip, QSlideTransition, QLayout, QToolbar, QToolbarTitle, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QCard, QCollapsible, QBtn, QInput, QSlider, QField, QSelect, QRadio, QCheckbox } from 'quasar'
+import { Toast, QTooltip, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QCollapsible, QBtn, QInput, QSlider, QField, QSelect, QRadio, QCheckbox } from 'quasar'
+import MyLayout from './MyLayout'
+import PopulationSelector from './PopulationSelector'
 import MermaidViewer from './MermaidViewer'
-import 'quasar-extras/animate/fadeOutUp.css'
-import 'quasar-extras/animate/fadeInDown.css'
 import graphSource from './psi.hbs'
 import numeral from 'numeral'
 import DHBs from './dhbs.js'
-import Regions from './regions.js'
 
 export default {
   name: 'psi',
   components: {
-    QTabs, QTabPane, QTab, QScrollArea, QTooltip, MermaidViewer, QSlideTransition, QLayout, QToolbar, QToolbarTitle, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCard, QCollapsible, QSelect, QRadio, QCheckbox
+    MyLayout, PopulationSelector, QTooltip, MermaidViewer, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCollapsible, QSelect, QRadio, QCheckbox
   },
   data () {
     return {
       mmdTemplate: graphSource,
       numeral: numeral,
-      showTable: false,
       bIVTandPSI: false,
       bPSIperDay: true,
       bPSIperNight: true,
       tableYears: [2018, 2019, 2020, 2021, 2022],
-      nPopulation: 10000,
-      nYear: 2018,
-      pPopulationGrowth: 2.5,
-      sRegions: ['Metro'],
-      sPopulations: ['Auckland', 'Counties Manukau', 'Waitemata'],
+      population: { regions: ['Metro'], dhbs: ['Auckland', 'Counties Manukau', 'Waitemata'], n: 0 },
       pAdults: 0.8,
       pIncidence: 147,
       pIschemic: 0.81,
@@ -176,28 +147,11 @@ export default {
       pCTPGood: 0.57,
       pRecannalized: 0.05,
       pOvernight: 0.10, // TODO: check this
-      DHBs: DHBs,
-      Regions: Regions
-    }
-  },
-  watch: {
-    nCalculatedPopulation: function (newPop) {
-      this.nPopulation = newPop
-    },
-    sRegions: function (newRegions) {
-      var self = this
-      var getRegionDHBs = function (regionName) {
-        var region = self.Regions.find(region => region.value === regionName)
-        if (region !== undefined) return region.dhbs
-      }
-      this.sPopulations = []
-      newRegions.forEach(function (region) {
-        self.sPopulations = self.sPopulations.concat(getRegionDHBs(region))
-      })
+      DHBs: DHBs
     }
   },
   computed: {
-    nCalculatedPopulation: function () { return this.getCalculatedPopulation(this.sPopulations, this.nYear) },
+    nPopulation: function () { return this.getCalculatedPopulation(this.population.dhbs, this.population.growth, this.population.year) },
     nAdults: function () { return Math.round(this.nPopulation * this.pAdults) },
     nStrokes: function () { return Math.round(this.nAdults * (this.pIncidence / 100000)) },
 
@@ -239,24 +193,23 @@ export default {
     nTotalPSI: function () { return (this.nPSIReqd + this.nCTPGood) }
   },
   mounted () {
-    this.nPopulation = this.nCalculatedPopulation
     Toast.create({
-      html: 'Click the menu icon in the top left of the toolbar to display the menu',
+      html: 'Click the menu icon in the top left of the toolbar to redisplay the menu',
       icon: 'menu',
       timeout: 5000
     })
   },
   methods: {
-    getCalculatedPopulation: function (sPopulations, year) {
+    getCalculatedPopulation: function (dhbs, growth, year) {
       var x = 0
-      sPopulations.forEach(o1 => {
+      dhbs.forEach(o1 => {
         x = x + this.DHBs.find(o2 => o2.value === o1).n
       })
-      x = x * Math.pow(1.0 + (this.pPopulationGrowth / 100), year - 2017)
+      x = x * Math.pow(1.0 + (growth / 100), year - 2017)
       return Math.round(x)
     },
     getTotalPSI: function (sPopulations, year) {
-      var x = this.getCalculatedPopulation(sPopulations, year)
+      var x = this.getCalculatedPopulation(sPopulations, this.population.growth, year)
       x = x * this.pAdults * (this.pIncidence / 100000) * this.pIschemic * this.pLVO * this.pModerate
 
       var early = x * this.pKTO * this.pLT4h * this.pEarlyInclusion * (1.0 - this.pRecannalized)

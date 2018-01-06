@@ -57,7 +57,6 @@ export default {
   },
   methods: {
     onResize: function () {
-      console.log('resize')
       if (this.svgChart !== undefined) {
         this.svgChart.resize().fit().center()
       }
@@ -97,7 +96,7 @@ export default {
       this.svgAnimate(x.zoom, {x: x.x, y: x.y})
     },
     renderm: debounce(function () {
-      console.log('renderm')
+      // console.log('renderm')
       var mermaidNode = document.getElementById('mermaid' + this.title)
       this.graphCounter = this.graphCounter + 1
       mermaid.render('mermaid' + this.title + this.graphCounter, this.source, (svgCode, bindFunctions) => {
@@ -168,7 +167,7 @@ export default {
 <style>
 .mermaid {
   width: 100%;
-  height: 73vh; 
+  height: calc(100vh - 215px);
 }
 
 .mermaid .label {
