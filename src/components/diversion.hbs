@@ -1,0 +1,22 @@
+graph TD
+  Population(<em>Population</em><br>N={{num nPopulation}}) -- {{prop pAdults}} Adult --> Adults[<em>Adults</em><br>N={{num nAdults}}]
+  Adults -- Stroke Incidence<br>{{pIncidence}}/100,000 --> Strokes[<em>Strokes</em><br>N={{num nStrokes}}]
+
+  Strokes -- Hyperacute {{prop pHyperacute}} --> Hyperacute[<em>Hyperacute</em><br>N={{num nHyperacute}}]
+  Strokes -- Non-acute {{prop pNonacute}} --> Nonacute(<em>Non-acute</em><br>N={{num nNonacute}})
+
+  Hyperacute -- After-hours {{prop pAfterhours}} --> Afterhours[<em>After-hours</em><br>N={{num nAfterhours}}]
+  Hyperacute -- In-hours {{prop pInhours}} --> Inhours(<em>In-hours</em><br>N={{num nInhours}})
+
+  Afterhours -- PASTA +ve {{prop pPASTAPos}} --> PastaPos[<em>PASTA Positive</em><br>N={{num nPASTAPos}}]
+  Afterhours -- PASTA -ve {{prop pPASTANeg}} --> PastaNeg(<em>PASTA Negative</em><br>N={{num nPASTANeg}})
+
+  PastaPos --> Divert(<em>Divert</em><br>N={{num nDivert}})
+
+  PastaPos -- Mimics {{prop pMimics}} --> Mimics[<em>Mimics</em>N={{num nMimics}}]
+  Mimics --> Divert
+
+  style Nonacute fill:#d3d3d3,stroke:#808080
+  style Inhours fill:#d3d3d3,stroke:#808080
+  style PastaNeg fill:#d3d3d3,stroke:#808080
+

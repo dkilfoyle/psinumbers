@@ -12,20 +12,22 @@
           q-field(label="Stroke Incidence" helper="Number of strokes/100,000 adults /yr")
             q-input(v-model="pIncidence")
 
-        q-collapsible(group="parameters" label="Radiology" icon="scanner" separator)
-          q-field(label="Ischemic %" helper="% of all strokes that are ischemic (81%)")
-            q-slider(v-model="pIschemic" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pIschemic*100)}%`")
-          q-field(label="IVT %" helper="% of ischemic stroke suitable for IVT")
-            q-slider(v-model="pIVT" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pIVT*100)}%`")
+        q-collapsible(group="parameters" label="Clinical" icon="favorite" separator)
+          q-field(label="Hyper-acute %" helper="% of all strokes that are hyperacute")
+            q-slider(v-model="pHyperacute" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pHyperacute*100)}%`")
+          q-field(label="After-hours %" helper="% of hyperacute stroke that present after-hours")
+            q-slider(v-model="pAfterhours" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pAfterhours*100)}%`")
+          q-field(label="PASTA Positive %" helper="% of hyperacute stroke that pass the PASTA screen")
+            q-slider(v-model="pPASTAPos" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pPASTAPos*100)}%`")
+          q-field(label="Mimics %" helper="Ratio as % of hyperacute stroke that are mimics")
+            q-slider(v-model="pMimics" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pMimics*100)}%`")
 
       q-list
         q-list-header Settings
         q-item-separator
         q-collapsible(group="settings" label="Table" icon="view_quilt" separator)
-          q-field(label="IVT per 24h day" helper="PSI cases per 24h day")
-            q-checkbox(v-model="bIVTperDay")
-          q-field(label="IVT per Night" helper="PSI cases per overnight")
-            q-checkbox(v-model="bIVTperNight")
+          q-field(label="Divert per 24h day" helper="PSI cases per 24h day")
+            q-checkbox(v-model="bDivertperDay")
         q-collapsible(group="settings" label="Populations" icon="local_hospital" separator)
           q-field(:label="dhb.label" v-for="dhb in DHBs" :key="dhb.label")
             q-input(v-model="dhb.n" type="number")
@@ -38,32 +40,23 @@
             th(v-for="year in tableYears") {{ year }}
         tbody
           tr
-            th IVT
+            th Divserions
           tr(v-for="dhb in population.dhbs")
             td {{ dhb }}
-            td(v-for="year in tableYears") {{ getTotalIVT([dhb], year) }}
+            td(v-for="year in tableYears") {{ getTotalDivert([dhb], year) }}
           tr
             td Total
-            td(v-for="year in tableYears") {{ getTotalIVT(population.dhbs, year) }}
+            td(v-for="year in tableYears") {{ getTotalDivert(population.dhbs, year) }}
           
-          tr(v-if="bIVTperDay")
-            th PSI/Day
-          tr(v-if="bIVTperDay" v-for="dhb in population.dhbs")
+          tr(v-if="bDivertperDay")
+            th Diversions/Day
+          tr(v-if="bDivertperDay" v-for="dhb in population.dhbs")
             td {{ dhb }}
-            td(v-for="year in tableYears") {{ getIVTperDay([dhb], year) }}
-          tr(v-if="bIVTperDay")
+            td(v-for="year in tableYears") {{ getDivertperDay([dhb], year) }}
+          tr(v-if="bDivertperDay")
             td Total
-            td(v-for="year in tableYears") {{ getIVTperDay(population.dhbs, year) }}
+            td(v-for="year in tableYears") {{ getDivertperDay(population.dhbs, year) }}
           
-          tr(v-if="bIVTperNight")
-            th PSI/Night
-          tr(v-if="bIVTperNight" v-for="dhb in population.dhbs")
-            td {{ dhb }}
-            td(v-for="year in tableYears") {{ getIVTperNight([dhb], year) }}
-          tr(v-if="bIVTperNight")
-            td Total
-            td(v-for="year in tableYears") {{ getIVTperNight(population.dhbs, year) }}
-
     div(slot="graph")
       mermaid-viewer(:source="mmdTemplate(this)" title="IVT" :maxwidth="false" :presets=`[]`)
         q-btn(@click="showTable = !showTable" flat icon="list" color="faded")
@@ -77,7 +70,7 @@ import MyLayout from './MyLayout'
 import PopulationSelector from './PopulationSelector'
 import MermaidViewer from './MermaidViewer'
 
-import graphSource from './ivt.hbs'
+import graphSource from './diversion.hbs'
 import numeral from 'numeral'
 import DHBs from './dhbs.js'
 
@@ -90,14 +83,16 @@ export default {
     return {
       mmdTemplate: graphSource,
       numeral: numeral,
-      bIVTperDay: false,
-      bIVTperNight: false,
+      bDivertperDay: false,
+      bDivertperNight: false,
       tableYears: [2018, 2019, 2020, 2021, 2022],
       population: { regions: ['Metro'], dhbs: ['Auckland', 'Counties Manukau', 'Waitemata'], n: 0 },
       pAdults: 0.8,
       pIncidence: 147,
-      pIschemic: 0.81,
-      pIVT: 0.15,
+      pHyperacute: 0.55,
+      pAfterhours: 0.61,
+      pPASTAPos: 0.65,
+      pMimics: 0.37,
       DHBs: DHBs
     }
   },
@@ -106,11 +101,20 @@ export default {
     nAdults: function () { return Math.round(this.nPopulation * this.pAdults) },
     nStrokes: function () { return Math.round(this.nAdults * (this.pIncidence / 100000)) },
 
-    nIschemic: function () { return Math.round(this.nStrokes * this.pIschemic) },
-    pHemorrhagic: function () { return (1.0 - this.pIschemic) },
-    nHemorrhagic: function () { return Math.round(this.nStrokes * this.pHemorrhagic) },
+    nHyperacute: function () { return Math.round(this.nStrokes * this.pHyperacute) },
+    pNonacute: function () { return (1.0 - this.pHyperacute) },
+    nNonacute: function () { return Math.round(this.nStrokes * this.pNonacute) },
 
-    nIVT: function () { return Math.round(this.nIschemic * this.pIVT) }
+    nAfterhours: function () { return Math.round(this.nHyperacute * this.pAfterhours) },
+    pInhours: function () { return (1.0 - this.pAfterhours) },
+    nInhours: function () { return Math.round(this.nHyperacute * this.pInhours) },
+
+    nPASTAPos: function () { return Math.round(this.nAfterhours * this.pPASTAPos) },
+    pPASTANeg: function () { return (1.0 - this.pPASTAPos) },
+    nPASTANeg: function () { return Math.round(this.nAfterhours * this.pPASTANeg) },
+
+    nMimics: function () { return Math.round(this.nPASTAPos * this.pMimics) },
+    nDivert: function () { return Math.round(this.nPASTAPos + this.nMimics) }
   },
   mounted () {
     Toast.create({
@@ -128,16 +132,17 @@ export default {
       x = x * Math.pow(1.0 + (growth / 100), year - 2017)
       return Math.round(x)
     },
-    getTotalIVT: function (sPopulations, year) {
+    getTotalDivert: function (sPopulations, year) {
       var x = this.getCalculatedPopulation(sPopulations, this.population.growth, year)
-      x = x * this.pAdults * (this.pIncidence / 100000) * this.pIschemic * this.pIVT
+      x = x * this.pAdults * (this.pIncidence / 100000) * this.pHyperacute * this.pAfterhours * this.pPASTAPos
+      x = x + (x * this.pMimics)
       return Math.round(x)
     },
-    getIVTperDay: function (sPopulations, year) {
-      return this.numeral(this.getTotalIVT(sPopulations, this.population.growth, year) / 365.0).format('0.0')
+    getDivertperDay: function (sPopulations, year) {
+      return this.numeral(this.getTotalDivert(sPopulations, this.population.growth, year) / 365.0).format('0.0')
     },
-    getIVTperNight: function (sPopulations, year) {
-      return this.numeral(this.getTotalIVT(sPopulations, this.population.growth, year) / 365.0 * this.pOvernight).format('0.0')
+    getDivertperNight: function (sPopulations, year) {
+      return this.numeral(this.getTotalDivert(sPopulations, this.population.growth, year) / 365.0 * this.pOvernight).format('0.0')
     }
   }
 }

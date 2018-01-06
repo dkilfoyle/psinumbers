@@ -34,7 +34,7 @@ export default {
     return {
       DHBs: DHBs,
       Regions: Regions,
-      sRegions: ['Metro'],
+      sRegions: [],
       sDHBs: [],
       pPopulationGrowth: 2.5,
       nYear: 2018
@@ -51,7 +51,8 @@ export default {
     }
   },
   mounted: function () {
-    this.sDHBs = ['Auckland', 'Counties Manukau', 'Waitemata']
+    this.sRegions = this.value.regions
+    this.sDHBs = this.value.dhbs // ['Auckland', 'Counties Manukau', 'Waitemata']
   },
   watch: {
     value: function () {
