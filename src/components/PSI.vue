@@ -39,6 +39,8 @@
             q-slider(v-model="pSUTO" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pSUTO*100)}%`")
           q-field(label="Onset > 12h" helper="% with known onset > 12h ago (7%)")
             q-slider(v-model="pGT12h" :min="0.01" :max="1.0" :step="0.01" :decimals="2" readonly label-always :label-value="`${Math.round(pGT12h*100)}%`")
+          q-field(label="No Exclusions" helper="% with mRS<2 and ASPECTS>6 (25%)")
+            q-slider(v-model="pLateInclusion" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pLateInclusion*100)}%`")
           q-field(label="Favourable CTP" helper="% with favourable CTP (57%)")
             q-slider(v-model="pCTPGood" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pCTPGood*100)}%`")
       
