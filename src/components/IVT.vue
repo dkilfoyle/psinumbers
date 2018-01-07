@@ -66,8 +66,6 @@
 
     div(slot="graph")
       mermaid-viewer(:source="mmdTemplate(this)" title="IVT" :maxwidth="false" :presets=`[]`)
-        q-btn(@click="showTable = !showTable" flat icon="list" color="faded")
-          q-tooltip Show Table
 
 </template>
 

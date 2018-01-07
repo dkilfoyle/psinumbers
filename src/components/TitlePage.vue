@@ -1,14 +1,16 @@
 <template lang="pug">
   .layout-padding
-    .row.lg-gutter.items-center.justify-end
-      .col-4
+    .row.lg-gutter.items-center.justify-center
+      .col-3
         img(src="../assets/nz-dhbs.jpg" class="responsive")
+      .col-3(style="text-align: center")
+        h3 Hyperacute Stroke
+        h4 Intervention Estimator
+    .row.lg-gutter.items-center.justify-center
       .col-8
-        h3 Hyperacute Stroke Intervention Estimator
-    .row
-      q-card.full-width(color="secondary")
-        q-card-main(style="text-align: center;")
-          | Select the intervention of interest from the menu at left.
+        q-card.full-width(color="secondary")
+          q-card-main(style="text-align: center;")
+            h6 Select the intervention of interest from the menu at left.
 </template>
 
 <script>

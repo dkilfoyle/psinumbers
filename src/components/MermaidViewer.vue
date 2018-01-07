@@ -11,6 +11,7 @@
             q-btn(@click="presetZoomPan(index), $refs.zoomPopover.close()" flat color="faded")
               q-icon(:name="item.icon")
               q-tooltip(anchor="center right" self="center left" :offset="[10, 10]") {{ item.label }}
+          //- q-btn(flat @click="logPanZoom") Log
     .mermaid(:id="'mermaid'+title")
     q-resize-observable(@resize="onResize")
           //- q-toggle(v-model="wheelZoom" icon="zoom_in" color="faded")

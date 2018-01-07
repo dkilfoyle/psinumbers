@@ -104,11 +104,11 @@
             td(v-for="year in tableYears") {{ getPSIperNight(population.dhbs, year) }}
 
     div(slot="graph")         
-      mermaid-viewer(:source="mmdTemplate(this)" :maxwidth="true" title="PSI" :presets=`[
-        { label: 'Zoom: Demographics', icon: 'people', zoom: 4.5, x: -1454, y: -3 },
-        { label: 'Zoom: Early presenters', icon: 'timer', zoom: 2.5, x: 110, y: -621 },
-        { label: 'Zoom: Late presenters', icon: 'timer_off', zoom: 2.5, x: -311, y: -762 }
-      ]`)
+      mermaid-viewer(:source="mmdTemplate(this)" :maxwidth="true" title="PSI" :presets=`[]`)
+        //- { label: 'Zoom: Demographics', icon: 'people', zoom: 4.5, x: 150, y: 240 },
+        //- { label: 'Zoom: Early presenters', icon: 'timer', zoom: 2.5, x: 110, y: -621 },
+        //- { label: 'Zoom: Late presenters', icon: 'timer_off', zoom: 2.5, x: -311, y: -762 }
+      //- ]`)
 </template>
 
 <script>

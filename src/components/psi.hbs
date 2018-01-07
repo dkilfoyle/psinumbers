@@ -11,26 +11,26 @@ graph TD
   LVO -- NIHSS>=6 {{prop pModerate}} --> Moderate[<em>Moderate-Severe</em><br>N={{num nModerate}}]
   LVO -- NIHSS< 6 {{prop pMild}} --> Mild(<em>Mild</em><br>N={{num nMild}})
 
-  Moderate -- Onset/LSW <12h<br>{{prop pKTO}} --> KTO[<em>KTO</em><br>{{num nKTO}}]
-  Moderate -- Unknown Onset<br>{{prop pSUTO}} --> SUTO[<em>SUTO</em><br>{{num nSUTO}}]
-  Moderate -- Known Onset > 12h<br>{{prop pGT12h}} --> TooLate(<em>Too Late</em><br>{{num nTooLate}})
+  Moderate -- Onset/LSW <12h<br>{{prop pKTO}} --> KTO[<em>KTO</em><br>N={{num nKTO}}]
+  Moderate -- Unknown Onset<br>{{prop pSUTO}} --> SUTO[<em>SUTO</em><br>N={{num nSUTO}}]
+  Moderate -- Known Onset > 12h<br>{{prop pGT12h}} --> TooLate(<em>Too Late</em><br>N={{num nTooLate}})
 
   subgraph Early
-  KTO -- <4h {{pLT4h}} --> LT4h[<em>0-4h</em><br>{{nLT4h}}]
-  LT4h -- No Exclusions<br>{{prop pEarlyInclusion}} --> Inclusion[<em>IVT and PSI Eligible</em><br>{{nEarlyInclusion}}]
-  LT4h -- mRS>2, ASPECTS<6<br>{{prop pEarlyExclusion}} --> Ineligible[<em>Ineligible</em><br>{{nEarlyExclusion}}]
-  Inclusion -- Lysis recanalized {{prop pRecannalized}} --> Lysed[<em>PSI not required</em><br>{{num nPSINotReqd}}]
-  Inclusion -- No recannalization {{prop pNotRecannalized}} --> PSIReqd[<em>PSI required</em><br>{{num nPSIReqd}}]
+  KTO -- <4h {{pLT4h}} --> LT4h[<em>0-4h</em><br>N={{num nLT4h}}]
+  LT4h -- No Exclusions<br>{{prop pEarlyInclusion}} --> Inclusion[<em>IVT and PSI Eligible</em><br>N={{nEarlyInclusion}}]
+  LT4h -- mRS>2, ASPECTS<6<br>{{prop pEarlyExclusion}} --> Ineligible[<em>Ineligible</em><br>N={{nEarlyExclusion}}]
+  Inclusion -- Lysis recanalized {{prop pRecannalized}} --> Lysed[<em>PSI not required</em><br>N={{num nPSINotReqd}}]
+  Inclusion -- No recannalization {{prop pNotRecannalized}} --> PSIReqd[<em>PSI required</em><br>N={{num nPSIReqd}}]
   end
 
   subgraph Late
-  KTO -- >4h {{prop pGT4h}} --> GT4h[<em>4-12h </em><br>{{num nGT4h}}]
-  GT4h-->Late[<em>Late</em><br>{{num nLate}}]
+  KTO -- >4h {{prop pGT4h}} --> GT4h[<em>4-12h </em><br>N={{num nGT4h}}]
+  GT4h-->Late[<em>Late</em><br>N={{num nLate}}]
   SUTO-->Late
-  Late -- No Exclusions<br>{{prop pLateInclusion}} --> LateInclusion[<em>No Exclusions</em><br>{{num nLateInclusion}}]
-  Late -- mRS>2, ASPECTS<6<br>{{prop pLateExclusion}} --> Exclusion[<em>Ineligible</em><br>{{num nLateExclusion}}]
-  LateInclusion -- Favourable CTP {{prop pCTPGood}} --> CTPGood[<em>Favourable CTP</em><br>{{num nCTPGood}}]
-  LateInclusion -- Unfavourable CTP {{prop pCTPBad}} --> CTPBad[<em>Unfavourable CTP</em><br>{{num nCTPBad}}]
+  Late -- No Exclusions<br>{{prop pLateInclusion}} --> LateInclusion[<em>No Exclusions</em><br>N={{num nLateInclusion}}]
+  Late -- mRS>2, ASPECTS<6<br>{{prop pLateExclusion}} --> Exclusion[<em>Ineligible</em><br>N={{num nLateExclusion}}]
+  LateInclusion -- Favourable CTP {{prop pCTPGood}} --> CTPGood[<em>Favourable CTP</em><br>N={{num nCTPGood}}]
+  LateInclusion -- Unfavourable CTP {{prop pCTPBad}} --> CTPBad[<em>Unfavourable CTP</em><br>N={{num nCTPBad}}]
   end
 
   CTPGood-->TotalPSI[<em>Total PSI</em><br>N={{num nTotalPSI}}]
