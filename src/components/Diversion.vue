@@ -8,19 +8,19 @@
         q-collapsible(group="parameters" label="Demographics" icon="people" separator)
           population-selector(v-model="population")
           q-field(label="Adults %" helper="Proportion of population >= 15y")
-            q-slider(v-model="pAdults" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pAdults*100)}%`")
+            q-slider(v-model="pAdults" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pAdults*100)}%`")
           q-field(label="Stroke Incidence" helper="Number of strokes/100,000 adults /yr")
             q-input(v-model="pIncidence")
 
         q-collapsible(group="parameters" label="Clinical" icon="favorite" separator)
           q-field(label="Hyper-acute %" helper="% of all strokes that are hyperacute")
-            q-slider(v-model="pHyperacute" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pHyperacute*100)}%`")
+            q-slider(v-model="pHyperacute" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pHyperacute*100)}%`")
           q-field(label="After-hours %" helper="% of hyperacute stroke that present after-hours")
-            q-slider(v-model="pAfterhours" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pAfterhours*100)}%`")
+            q-slider(v-model="pAfterhours" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pAfterhours*100)}%`")
           q-field(label="PASTA Positive %" helper="% of hyperacute stroke that pass the PASTA screen")
-            q-slider(v-model="pPASTAPos" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pPASTAPos*100)}%`")
+            q-slider(v-model="pPASTAPos" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pPASTAPos*100)}%`")
           q-field(label="Mimics %" helper="Ratio as % of hyperacute stroke that are mimics")
-            q-slider(v-model="pMimics" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pMimics*100)}%`")
+            q-slider(v-model="pMimics" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pMimics*100)}%`")
 
       q-list
         q-list-header Settings

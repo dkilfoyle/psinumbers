@@ -8,15 +8,15 @@
         q-collapsible(group="parameters" label="Demographics" icon="people" separator)
           population-selector(v-model="population")
           q-field(label="Adults %" helper="Proportion of population >= 15y")
-            q-slider(v-model="pAdults" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pAdults*100)}%`")
+            q-slider(v-model="pAdults" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pAdults*100)}%`")
           q-field(label="Stroke Incidence" helper="Number of strokes/100,000 adults /yr")
             q-input(v-model="pIncidence")
 
         q-collapsible(group="parameters" label="Radiology" icon="scanner" separator)
           q-field(label="Ischemic %" helper="% of all strokes that are ischemic (81%)")
-            q-slider(v-model="pIschemic" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pIschemic*100)}%`")
+            q-slider(v-model="pIschemic" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pIschemic*100)}%`")
           q-field(label="IVT %" helper="% of ischemic stroke suitable for IVT")
-            q-slider(v-model="pIVT" :min="0.01" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pIVT*100)}%`")
+            q-slider(v-model="pIVT" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pIVT*100)}%`")
 
       q-list
         q-list-header Settings
