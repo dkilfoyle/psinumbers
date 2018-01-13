@@ -137,7 +137,7 @@ export default {
       tableYears: [2018, 2019, 2020, 2021, 2022],
       population: { regions: ['Metro'], dhbs: ['Auckland', 'Counties Manukau', 'Waitemata'], n: 0 },
       pAdults: 0.8,
-      pIncidence: 147,
+      pIncidence: 192,
       pIschemic: 0.81,
       pLVO: 0.40,
       pModerate: 0.8,
