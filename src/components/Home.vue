@@ -4,7 +4,7 @@
       q-btn.flat(@click="$refs.layout.toggleLeft()")
         q-icon(name="menu")
       q-toolbar-title Hyperacute Stroke Treatment Estimator
-        div(slot="subtitle") Adapted from McKeen et al. ESJ 2017; 24(3): 319-326
+        div(slot="subtitle") Adapted from McMeekin et al. ESJ 2017; 24(3): 319-326
 
     div(slot="left")
       q-list(no-border link)
