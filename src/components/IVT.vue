@@ -17,7 +17,10 @@
             q-slider(v-model="pIschemic" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pIschemic*100)}%`")
           q-field(label="IVT %" helper="% of ischemic stroke suitable for IVT")
             q-slider(v-model="pIVT" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pIVT*100)}%`")
-
+      
+        q-collapsible(group="parameters" label="Defaults" icon="settings" separator)
+          q-btn(@click="resetDefaults()" color="secondary" class="full-width") Reset All
+      
       q-list
         q-list-header Settings
         q-item-separator
@@ -91,9 +94,9 @@ export default {
       bIVTperDay: false,
       bIVTperNight: false,
       tableYears: [2018, 2019, 2020, 2021, 2022],
-      population: { regions: ['Metro'], dhbs: ['Auckland', 'Counties Manukau', 'Waitemata'], n: 0 },
+      population: { regions: ['Metro'], dhbs: ['Auckland', 'Counties Manukau', 'Waitemata'] },
       pAdults: 0.8,
-      pIncidence: 147,
+      pIncidence: 192,
       pIschemic: 0.81,
       pIVT: 0.15,
       pOvernight: 0.18,
@@ -139,6 +142,17 @@ export default {
     })
   },
   methods: {
+    resetDefaults: function () {
+      this.population.regions = ['Metro']
+      this.population.dhbs = ['Auckland', 'Counties Manukau', 'Waitemata']
+      this.population.year = '2018'
+      this.pAdults = 0.8
+      this.pIncidence = 192
+      this.pIschemic = 0.81
+      this.pIVT = 0.15
+      this.pOvernight = 0.18
+      this.pAfterhours = 0.61
+    },
     getCalculatedPopulation: function (dhbs, growth, year) {
       var x = 0
       dhbs.forEach(o1 => {

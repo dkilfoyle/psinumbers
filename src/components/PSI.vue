@@ -47,7 +47,9 @@
         q-collapsible(group="parameters" label="Time of Day" icon="access_time" separator)
           q-field(label="Overnight" helper="% presenting overnight")
             q-slider(v-model="pOvernight" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pOvernight*100)}%`")
-      
+        q-collapsible(group="parameters" label="Defaults" icon="settings" separator)
+          q-btn(@click="resetDefaults()" color="secondary" class="full-width") Reset All
+
       q-list
         q-list-header Settings
         q-item-separator
@@ -137,7 +139,7 @@ export default {
       bPSIperDay: true,
       bPSIperNight: true,
       tableYears: [2018, 2019, 2020, 2021, 2022],
-      population: { regions: ['Metro'], dhbs: ['Auckland', 'Counties Manukau', 'Waitemata'], n: 0 },
+      population: { regions: ['Metro'], dhbs: ['Auckland', 'Counties Manukau', 'Waitemata'], year: '2018' },
       pAdults: 0.8,
       pIncidence: 192,
       pIschemic: 0.81,
@@ -268,6 +270,24 @@ export default {
     })
   },
   methods: {
+    resetDefaults: function () {
+      this.population.regions = ['Metro']
+      this.population.dhbs = ['Auckland', 'Counties Manukau', 'Waitemata']
+      this.population.year = '2018'
+      this.pAdults = 0.8
+      this.pIncidence = 192
+      this.pIschemic = 0.81
+      this.pLVO = 0.40
+      this.pModerate = 0.8
+      this.pKTO = 0.78
+      this.pSUTO = 0.15
+      this.pLT4h = 0.74
+      this.pEarlyInclusion = 0.66
+      this.pLateInclusion = 0.25
+      this.pCTPGood = 0.57
+      this.pRecannalized = 0.05
+      this.pOvernight = 0.10 // TODO = check this
+    },
     getCalculatedPopulation: function (dhbs, growth, year) {
       var x = 0
       dhbs.forEach(o1 => {
