@@ -54,6 +54,8 @@
         q-list-header Settings
         q-item-separator
         q-collapsible(group="settings" label="Table" icon="view_quilt" separator)
+          q-field(label="Show Custom Parameters" helper="Show parameters that vary from defaults")
+            q-checkbox(v-model="bShowCustomParams")
           q-field(label="IVT and PSI" helper="Patients treated with both IVT and PSI")
             q-checkbox(v-model="bIVTandPSI")
           q-field(label="PSI per 24h day" helper="PSI cases per 24h day")
@@ -65,6 +67,7 @@
             q-input(v-model="dhb.n" type="number")
 
     div(slot="table")
+
       table.q-table.horizontal-separator
         thead
           tr
@@ -138,8 +141,9 @@ export default {
       bIVTandPSI: false,
       bPSIperDay: true,
       bPSIperNight: true,
+      bShowCustomParams: false,
       tableYears: [2018, 2019, 2020, 2021, 2022],
-      population: { regions: ['Metro'], dhbs: ['Auckland', 'Counties Manukau', 'Waitemata'], year: '2018' },
+      population: { regions: ['Metro'], dhbs: ['Auckland', 'Counties Manukau', 'Waitemata'], year: 2018 },
       pAdults: 0.8,
       pIncidence: 192,
       pIschemic: 0.81,

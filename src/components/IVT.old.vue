@@ -7,15 +7,17 @@
 
         q-collapsible(group="parameters" label="Demographics" icon="people" separator)
           population-selector(v-model="population")
-          q-field(v-for="param in Object.values(params).filter(p => p.group === 'Demographics')" :key="param.name" :label="param.label" :helper="param.helper")
-            q-slider(v-if="param.type===undefined" v-model="param.val" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(param.val*100)}%`")
-            q-input(v-if="param.type==='number'" v-model="param.val")
+          q-field(label="Adults %" helper="Proportion of population >= 15y")
+            q-slider(v-model="pAdults" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pAdults*100)}%`")
+          q-field(label="Stroke Incidence" helper="Number of strokes/100,000 adults /yr")
+            q-input(v-model="pIncidence")
 
-        q-collapsible(v-for="paramGroup in paramGroups" :key="paramGroup.label" group="parameters" :label="paramGroup.label" :icon="paramGroup.icon" separator)
-          q-field(v-for="param in Object.values(params).filter(p => p.group === paramGroup.label)" :key="param.name" :label="param.label" :helper="param | getHelper")
-            q-slider(v-if="param.type===undefined" v-model="param.val" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(param.val*100)}%`")
-            q-input(v-if="param.type==='number'" v-model="param.val")
-
+        q-collapsible(group="parameters" label="Radiology" icon="scanner" separator)
+          q-field(label="Ischemic %" helper="% of all strokes that are ischemic (81%)")
+            q-slider(v-model="pIschemic" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pIschemic*100)}%`")
+          q-field(label="IVT %" helper="% of ischemic stroke suitable for IVT")
+            q-slider(v-model="pIVT" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pIVT*100)}%`")
+      
         q-collapsible(group="parameters" label="Defaults" icon="settings" separator)
           q-btn(@click="resetDefaults()" color="secondary" class="full-width") Reset All
       
@@ -34,17 +36,15 @@
             q-input(v-model="dhb.n" type="number")
 
     div(slot="table")
-      table.q-table.horizonal-separator.bordered(v-if="bShowCustomParams" style="margin-bottom: 20px")
+      table.q-table.horizonal-separator(v-if="bShowCustomParams")
         thead
           tr
             th Parameter
             th Setting
         tbody
-          tr(v-for="param in params" v-if="param.val !== param.default")
+          tr(v-for="param in params" v-if="param.val != param.default")
             td {{ param.label }}
             td {{ param.val }}
-          tr(v-if="Object.values(params).find(x => x.val === x.default) === undefined")
-            td No custom parameters
       table.q-table.horizontal-separator
         thead
           tr
@@ -89,8 +89,7 @@ import MyLayout from './MyLayout'
 import PopulationSelector from './PopulationSelector'
 import FlowChartViewer from './FlowChartViewer'
 import numeral from 'numeral'
-import DHBs from './dhbs'
-import Params from './IVTParams'
+import DHBs from './dhbs.js'
 
 var n = function (mynum) { return numeral(mynum).format('0,0') }
 var p = function (mynum) { return numeral(mynum).format('0%') }
@@ -107,34 +106,26 @@ export default {
       bIVTperNight: false,
       bShowCustomParams: false,
       tableYears: [2018, 2019, 2020, 2021, 2022],
-      paramGroups: [ { label: 'Radiology', icon: 'scanner' }, { label: 'Clinical', icon: 'favorite' } ],
-      population: { regions: ['Metro'], dhbs: ['Auckland', 'Counties Manukau', 'Waitemata'], year: 2018 },
-      params: Params,
+      population: { regions: ['Metro'], dhbs: ['Auckland', 'Counties Manukau', 'Waitemata'], year: '2018' },
+      pAdults: 0.8,
+      pIncidence: 192,
+      pIschemic: 0.81,
+      pIVT: 0.15,
+      pOvernight: 0.18,
+      pAfterhours: 0.61,
       DHBs: DHBs
-    }
-  },
-  filters: {
-    getHelper: function (param) {
-      var x = ''
-      if (param.type === undefined) {
-        x = param.helper + ' (' + numeral(param.default).format('0%') + ')'
-      }
-      else {
-        x = param.helper + ' (' + param.default + ')'
-      }
-      return (x)
     }
   },
   computed: {
     nPopulation: function () { return this.getCalculatedPopulation(this.population.dhbs, this.population.growth, this.population.year) },
-    nAdults: function () { return Math.round(this.nPopulation * this.params.pAdults.val) },
-    nStrokes: function () { return Math.round(this.nAdults * (this.params.pIncidence.val / 100000)) },
+    nAdults: function () { return Math.round(this.nPopulation * this.pAdults) },
+    nStrokes: function () { return Math.round(this.nAdults * (this.pIncidence / 100000)) },
 
-    nIschemic: function () { return Math.round(this.nStrokes * this.params.pIschemic.val) },
-    pHemorrhagic: function () { return (1.0 - this.params.pIschemic.val) },
+    nIschemic: function () { return Math.round(this.nStrokes * this.pIschemic) },
+    pHemorrhagic: function () { return (1.0 - this.pIschemic) },
     nHemorrhagic: function () { return Math.round(this.nStrokes * this.pHemorrhagic) },
 
-    nIVT: function () { return Math.round(this.nIschemic * this.params.pIVT.val) },
+    nIVT: function () { return Math.round(this.nIschemic * this.pIVT) },
     flowchartData: function () {
       return {
         nodes: [
@@ -146,11 +137,11 @@ export default {
           {id: 'IVT', label: '*IVT*\nN=' + n(this.nIVT), level: 3, group: 'end'}
         ],
         edges: [
-          {id: 'pAdults', from: 'Population', to: 'Adults', label: 'Adults ' + p(this.params.pAdults.val), value: 1.0},
-          {id: 'pStrokes', from: 'Adults', to: 'Strokes', label: 'Incidence\n' + this.params.pIncidence.val + '/100,000', value: 1.0},
-          {id: 'pIschemic', from: 'Strokes', to: 'Ischemic', label: p(this.params.pIschemic.val), value: this.params.pIschemic.val},
+          {id: 'pAdults', from: 'Population', to: 'Adults', label: 'Adults ' + p(this.pAdults), value: 1.0},
+          {id: 'pStrokes', from: 'Adults', to: 'Strokes', label: 'Incidence\n' + this.pIncidence + '/100,000', value: 1.0},
+          {id: 'pIschemic', from: 'Strokes', to: 'Ischemic', label: p(this.pIschemic), value: this.pIschemic},
           {id: 'pHemorrhagic', from: 'Strokes', to: 'Hemorrhagic', label: p(this.pHemorrhagic), value: this.pHemorrhagic},
-          {id: 'pIVT', from: 'Ischemic', to: 'IVT', label: p(this.params.pIVT.val), value: this.params.pIVT.val}
+          {id: 'pIVT', from: 'Ischemic', to: 'IVT', label: p(this.pIVT), value: this.pIVT}
         ]
       }
     }
@@ -166,11 +157,13 @@ export default {
     resetDefaults: function () {
       this.population.regions = ['Metro']
       this.population.dhbs = ['Auckland', 'Counties Manukau', 'Waitemata']
-      this.population.year = 2018
-      var self = this
-      Object.keys(this.params).forEach(function (paramName) {
-        self.params[paramName].val = self.params[paramName].default
-      })
+      this.population.year = '2018'
+      this.pAdults = 0.8
+      this.pIncidence = 192
+      this.pIschemic = 0.81
+      this.pIVT = 0.15
+      this.pOvernight = 0.18
+      this.pAfterhours = 0.61
     },
     getCalculatedPopulation: function (dhbs, growth, year) {
       var x = 0
@@ -182,7 +175,7 @@ export default {
     },
     getTotalIVT: function (sPopulations, year) {
       var x = this.getCalculatedPopulation(sPopulations, this.population.growth, year)
-      x = x * this.params.pAdults.val * (this.params.pIncidence.val / 100000) * this.params.pIschemic.val * this.params.pIVT.val
+      x = x * this.pAdults * (this.pIncidence / 100000) * this.pIschemic * this.pIVT
       return Math.round(x)
     },
     getIVTperDay: function (sPopulations, year) {

@@ -41,6 +41,7 @@ export default {
   methods: {
     renderFlowchart: function () {
       var container = document.getElementById(this.flowchartId)
+      if (container === null) return // catch resize events when the tab is changed to table
       var nodes = new vis.DataSet(this.flowchartData.nodes)
       var edges = new vis.DataSet(this.flowchartData.edges)
 
@@ -126,6 +127,8 @@ export default {
       this.flowchartObject = new vis.Network(container, data, options)
     },
     onResize: function () {
+      console.log('resize')
+      console.log(this.flowchartObject)
       this.renderFlowchart()
     },
     fit: function () {

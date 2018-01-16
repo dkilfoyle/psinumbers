@@ -89,7 +89,7 @@ export default {
       bDivertperDay: false,
       bDivertperNight: false,
       tableYears: [2018, 2019, 2020, 2021, 2022],
-      population: { regions: ['Metro'], dhbs: ['Auckland', 'Counties Manukau', 'Waitemata'], n: 0 },
+      population: { regions: ['Metro'], dhbs: ['Auckland', 'Counties Manukau', 'Waitemata'], year: '2018' },
       pAdults: 0.8,
       pIncidence: 192,
       pHyperacute: 0.55,
