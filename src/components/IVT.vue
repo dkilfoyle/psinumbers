@@ -65,7 +65,7 @@
             td(v-for="year in tableYears") {{ getIVTperNight(population.dhbs, year) }}
 
     div(slot="graph")
-      mermaid-viewer(:source="mmdTemplate(this)" title="IVT" :maxwidth="false" :presets=`[]`)
+      flow-chart-viewer(title="PSI" :flowchartData="flowchartData" :presets=`[]`)
 
 </template>
 
@@ -73,19 +73,20 @@
 import { Toast, QTooltip, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QCollapsible, QBtn, QInput, QSlider, QField, QSelect, QRadio, QCheckbox } from 'quasar'
 import MyLayout from './MyLayout'
 import PopulationSelector from './PopulationSelector'
-import MermaidViewer from './MermaidViewer'
-import graphSource from './ivt.hbs'
+import FlowChartViewer from './FlowChartViewer'
 import numeral from 'numeral'
 import DHBs from './dhbs.js'
+
+var n = function (mynum) { return numeral(mynum).format('0,0') }
+var p = function (mynum) { return numeral(mynum).format('0%') }
 
 export default {
   name: 'ivt',
   components: {
-    MyLayout, PopulationSelector, QTooltip, MermaidViewer, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCollapsible, QSelect, QRadio, QCheckbox
+    FlowChartViewer, MyLayout, PopulationSelector, QTooltip, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCollapsible, QSelect, QRadio, QCheckbox
   },
   data () {
     return {
-      mmdTemplate: graphSource,
       numeral: numeral,
       bIVTperDay: false,
       bIVTperNight: false,
@@ -109,7 +110,26 @@ export default {
     pHemorrhagic: function () { return (1.0 - this.pIschemic) },
     nHemorrhagic: function () { return Math.round(this.nStrokes * this.pHemorrhagic) },
 
-    nIVT: function () { return Math.round(this.nIschemic * this.pIVT) }
+    nIVT: function () { return Math.round(this.nIschemic * this.pIVT) },
+    flowchartData: function () {
+      return {
+        nodes: [
+          {id: 'Population', label: '*Population*\nN=' + n(this.nPopulation), level: 0, shape: 'ellipse', font: {multi: 'md'}, group: 'end'},
+          {id: 'Adults', label: '*Adults*\nN=' + n(this.nAdults), level: 1, group: 0},
+          {id: 'Strokes', label: '*Strokes*\nN=' + n(this.nStrokes), level: 2, group: 0},
+          {id: 'Ischemic', label: '*Ischemic\nN=' + n(this.nIschemic), level: 3, group: 0},
+          {id: 'Hemorrhagic', label: '*Hemorrhagic*\nN=' + n(this.nHemorrhagic), level: 2, group: 'out'},
+          {id: 'IVT', label: '*IVT*\nN=' + n(this.nIVT), level: 3, group: 'end'}
+        ],
+        edges: [
+          {id: 'pAdults', from: 'Population', to: 'Adults', label: 'Adults ' + p(this.pAdults), value: 1.0},
+          {id: 'pStrokes', from: 'Adults', to: 'Strokes', label: 'Incidence\n' + this.pIncidence + '/100,000', value: 1.0},
+          {id: 'pIschemic', from: 'Strokes', to: 'Ischemic', label: p(this.pIschemic), value: this.pIschemic},
+          {id: 'pHemorrhagic', from: 'Strokes', to: 'Hemorrhagic', label: p(this.pHemorrhagic), value: this.pHemorrhagic},
+          {id: 'pIVT', from: 'Ischemic', to: 'IVT', label: p(this.pIVT), value: this.pIVT}
+        ]
+      }
+    }
   },
   mounted () {
     Toast.create({

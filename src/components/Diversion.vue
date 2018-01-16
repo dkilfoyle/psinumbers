@@ -58,9 +58,10 @@
             td(v-for="year in tableYears") {{ getDivertperDay(population.dhbs, year) }}
           
     div(slot="graph")
-      mermaid-viewer(:source="mmdTemplate(this)" title="IVT" :maxwidth="false" :presets=`[]`)
-        q-btn(@click="showTable = !showTable" flat icon="list" color="faded")
-          q-tooltip Show Table
+      flow-chart-viewer(title="PSI" :flowchartData="flowchartData" :presets=`[
+        { label: 'Zoom: Demographics', icon: 'people', nodes: ['Population', 'Adults', 'Strokes'] },
+        { label: 'Zoom: Hyperacute', icon: 'timer', nodes: ['Hyperacute', 'Divert'] },
+      ]`)
 
 </template>
 
@@ -68,20 +69,20 @@
 import { Toast, QTooltip, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QCollapsible, QBtn, QInput, QSlider, QField, QSelect, QRadio, QCheckbox } from 'quasar'
 import MyLayout from './MyLayout'
 import PopulationSelector from './PopulationSelector'
-import MermaidViewer from './MermaidViewer'
-
-import graphSource from './diversion.hbs'
+import FlowChartViewer from './FlowChartViewer'
 import numeral from 'numeral'
 import DHBs from './dhbs.js'
+
+var n = function (mynum) { return numeral(mynum).format('0,0') }
+var p = function (mynum) { return numeral(mynum).format('0%') }
 
 export default {
   name: 'ivt',
   components: {
-    MyLayout, PopulationSelector, QTooltip, MermaidViewer, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCollapsible, QSelect, QRadio, QCheckbox
+    MyLayout, PopulationSelector, QTooltip, FlowChartViewer, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCollapsible, QSelect, QRadio, QCheckbox
   },
   data () {
     return {
-      mmdTemplate: graphSource,
       numeral: numeral,
       bDivertperDay: false,
       bDivertperNight: false,
@@ -114,7 +115,39 @@ export default {
     nPASTANeg: function () { return Math.round(this.nAfterhours * this.pPASTANeg) },
 
     nMimics: function () { return Math.round(this.nPASTAPos * this.pMimics) },
-    nDivert: function () { return Math.round(this.nPASTAPos + this.nMimics) }
+    nDivert: function () { return Math.round(this.nPASTAPos + this.nMimics) },
+
+    flowchartData: function () {
+      return {
+        nodes: [
+          {id: 'Population', label: '*Population*\nN=' + n(this.nPopulation), level: 0, shape: 'ellipse', font: {multi: 'md'}, group: 'end'},
+          {id: 'Adults', label: '*Adults*\nN=' + n(this.nAdults), level: 1, group: 0},
+          {id: 'Strokes', label: '*Strokes*\nN=' + n(this.nStrokes), level: 2, group: 0},
+          {id: 'Hyperacute', label: '*Hyperacute\nN=' + n(this.nHyperacute), level: 3, group: 0},
+          {id: 'Nonacute', label: '*Non Acute*\nN=' + n(this.nNonacute), level: 2, group: 'out'},
+          {id: 'Afterhours', label: '*Afterhours*\nN=' + n(this.nAfterhours), level: 4},
+          {id: 'Inhours', label: '*In hours*\nN=' + n(this.nInhours), level: 3, group: 'out'},
+          {id: 'PASTAPos', label: '*PASTA Positive\nN=' + n(this.nPASTAPos), level: 5},
+          {id: 'PASTANeg', label: '*PASTA Negative\nN=' + n(this.nPASTANeg), level: 4, group: 'out'},
+
+          {id: 'Mimics', label: '*Mimics*\nN=' + n(this.nMimics), level: 6, x: -50},
+          {id: 'Divert', label: '*Divert*\nN=' + n(this.nDivert), level: 6, group: 'end'}
+        ],
+        edges: [
+          {id: 'pAdults', from: 'Population', to: 'Adults', label: 'Adults ' + p(this.pAdults), value: 1.0},
+          {id: 'pStrokes', from: 'Adults', to: 'Strokes', label: 'Incidence\n' + this.pIncidence + '/100,000', value: 1.0},
+          {id: 'pHyperacute', from: 'Strokes', to: 'Hyperacute', label: p(this.pHyperacute), value: this.pHyperacute},
+          {id: 'pNonacute', from: 'Strokes', to: 'Nonacute', label: p(this.pNonacute), value: this.pNonacute},
+          {id: 'pAfterhours', from: 'Hyperacute', to: 'Afterhours', label: p(this.pAfterhours), value: this.pAfterhours},
+          {id: 'pInhours', from: 'Hyperacute', to: 'Inhours', label: p(this.pInhours), value: this.pInhours},
+          {id: 'pPASTAPos', from: 'Afterhours', to: 'PASTAPos', label: p(this.pPASTAPos), value: this.pPASTAPos},
+          {id: 'pPASTANeg', from: 'Afterhours', to: 'PASTANeg', label: p(this.pPASTANeg), value: this.pPASTANeg},
+          {id: 'pMimics', from: 'PASTAPos', to: 'Mimics', label: p(this.pMimics), value: this.pMimics},
+          {id: 'pDivert1', from: 'PASTAPos', to: 'Divert'},
+          {id: 'pDivert2', from: 'Mimics', to: 'Divert'}
+        ]
+      }
+    }
   },
   mounted () {
     Toast.create({

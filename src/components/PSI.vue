@@ -106,30 +106,32 @@
             td(v-for="year in tableYears") {{ getPSIperNight(population.dhbs, year) }}
 
     div(slot="graph")         
-      mermaid-viewer(:source="mmdTemplate(this)" :maxwidth="true" title="PSI" :presets=`[]`)
-        //- { label: 'Zoom: Demographics', icon: 'people', zoom: 4.5, x: 150, y: 240 },
-        //- { label: 'Zoom: Early presenters', icon: 'timer', zoom: 2.5, x: 110, y: -621 },
-        //- { label: 'Zoom: Late presenters', icon: 'timer_off', zoom: 2.5, x: -311, y: -762 }
-      //- ]`)
+      flow-chart-viewer(title="PSI" :flowchartData="flowchartData" :presets=`[
+        { label: 'Zoom: Demographics', icon: 'people', nodes: ['Population', 'Adults', 'Strokes', 'Ischemic', 'LVO'] },
+        { label: 'Zoom: Early presenters', icon: 'timer', nodes: ['KTO', 'LT4h', 'GT4h', 'EarlyInclusion', 'EarlyExclusion', 'PSIReqd', 'PSINotReqd', 'TotalPSI']},
+        { label: 'Zoom: Late presenters', icon: 'timer_off', nodes: ['SUTO', 'TooLate', 'CTPBad', 'TotalPSI'] }
+      ]`)
+
 </template>
 
 <script>
 import { Toast, QTooltip, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QCollapsible, QBtn, QInput, QSlider, QField, QSelect, QRadio, QCheckbox } from 'quasar'
 import MyLayout from './MyLayout'
 import PopulationSelector from './PopulationSelector'
-import MermaidViewer from './MermaidViewer'
-import graphSource from './psi.hbs'
+import FlowChartViewer from './FlowChartViewer'
 import numeral from 'numeral'
 import DHBs from './dhbs.js'
+
+var n = function (mynum) { return numeral(mynum).format('0,0') }
+var p = function (mynum) { return numeral(mynum).format('0%') }
 
 export default {
   name: 'psi',
   components: {
-    MyLayout, PopulationSelector, QTooltip, MermaidViewer, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCollapsible, QSelect, QRadio, QCheckbox
+    FlowChartViewer, MyLayout, PopulationSelector, QTooltip, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCollapsible, QSelect, QRadio, QCheckbox
   },
   data () {
     return {
-      mmdTemplate: graphSource,
       numeral: numeral,
       bIVTandPSI: false,
       bPSIperDay: true,
@@ -154,45 +156,109 @@ export default {
   },
   computed: {
     nPopulation: function () { return this.getCalculatedPopulation(this.population.dhbs, this.population.growth, this.population.year) },
-    nAdults: function () { return Math.round(this.nPopulation * this.pAdults) },
-    nStrokes: function () { return Math.round(this.nAdults * (this.pIncidence / 100000)) },
+    nAdults: function () { return (this.nPopulation * this.pAdults) },
+    nStrokes: function () { return (this.nAdults * (this.pIncidence / 100000)) },
 
-    nIschemic: function () { return Math.round(this.nStrokes * this.pIschemic) },
+    nIschemic: function () { return (this.nStrokes * this.pIschemic) },
     pHemorrhagic: function () { return (1.0 - this.pIschemic) },
-    nHemorrhagic: function () { return Math.round(this.nStrokes * this.pHemorrhagic) },
+    nHemorrhagic: function () { return (this.nStrokes * this.pHemorrhagic) },
 
-    nLVO: function () { return Math.round(this.nIschemic * this.pLVO) },
+    nLVO: function () { return (this.nIschemic * this.pLVO) },
     pSVO: function () { return (1.0 - this.pLVO) },
-    nSVO: function () { return Math.round(this.nIschemic * this.pSVO) },
+    nSVO: function () { return (this.nIschemic * this.pSVO) },
 
-    nModerate: function () { return Math.round(this.nLVO * this.pModerate) },
+    nModerate: function () { return (this.nLVO * this.pModerate) },
     pMild: function () { return (1.0 - this.pModerate) },
-    nMild: function () { return Math.round(this.nLVO * this.pMild) },
+    nMild: function () { return (this.nLVO * this.pMild) },
 
-    nKTO: function () { return Math.round(this.nModerate * this.pKTO) },
-    nLT4h: function () { return Math.round(this.nKTO * this.pLT4h) },
-    nEarlyInclusion: function () { return Math.round(this.nLT4h * this.pEarlyInclusion) },
+    nKTO: function () { return (this.nModerate * this.pKTO) },
+    nLT4h: function () { return (this.nKTO * this.pLT4h) },
+    nEarlyInclusion: function () { return (this.nLT4h * this.pEarlyInclusion) },
     pEarlyExclusion: function () { return (1.0 - this.pEarlyInclusion) },
-    nEarlyExclusion: function () { return Math.round(this.nLT4h * this.pEarlyExclusion) },
-    nPSIReqd: function () { return Math.round(this.nEarlyInclusion * this.pNotRecannalized) },
+    nEarlyExclusion: function () { return (this.nLT4h * this.pEarlyExclusion) },
+    nPSIReqd: function () { return (this.nEarlyInclusion * this.pNotRecannalized) },
     pNotRecannalized: function () { return (1.0 - this.pRecannalized) },
-    nPSINotReqd: function () { return Math.round(this.nEarlyInclusion * this.pRecannalized) },
+    nPSINotReqd: function () { return (this.nEarlyInclusion * this.pRecannalized) },
 
     pGT4h: function () { return (1.0 - this.pLT4h) },
-    nGT4h: function () { return Math.round(this.nKTO * this.pGT4h) },
-    nSUTO: function () { return Math.round(this.nModerate * this.pSUTO) },
+    nGT4h: function () { return (this.nKTO * this.pGT4h) },
+    nSUTO: function () { return (this.nModerate * this.pSUTO) },
     nLate: function () { return (this.nGT4h + this.nSUTO) },
     pGT12h: function () { return (1.0 - this.pKTO - this.pSUTO) },
     nTooLate: function () { return (this.nModerate - this.pGT12h) },
 
-    nLateInclusion: function () { return Math.round(this.nLate * this.pLateInclusion) },
+    nLateInclusion: function () { return (this.nLate * this.pLateInclusion) },
     pLateExclusion: function () { return (1.0 - this.pLateInclusion) },
-    nLateExclusion: function () { return Math.round(this.nLate * this.pLateExclusion) },
-    nCTPGood: function () { return Math.round(this.nLateInclusion * this.pCTPGood) },
+    nLateExclusion: function () { return (this.nLate * this.pLateExclusion) },
+    nCTPGood: function () { return (this.nLateInclusion * this.pCTPGood) },
     pCTPBad: function () { return (1.0 - this.pCTPGood) },
-    nCTPBad: function () { return Math.round(this.nLateInclusion * this.pCTPBad) },
+    nCTPBad: function () { return (this.nLateInclusion * this.pCTPBad) },
 
-    nTotalPSI: function () { return (this.nPSIReqd + this.nCTPGood) }
+    nTotalPSI: function () { return (this.nPSIReqd + this.nCTPGood) },
+
+    flowchartData: function () {
+      return {
+        nodes: [
+          {id: 'Population', label: '*Population*\nN=' + n(this.nPopulation), level: 0, shape: 'ellipse', font: {multi: 'md'}, group: 'end'},
+          {id: 'Adults', label: '*Adults*\nN=' + n(this.nAdults), level: 1, group: 0},
+          {id: 'Strokes', label: '*Strokes*\nN=' + n(this.nStrokes), level: 2, group: 0},
+          {id: 'Ischemic', label: '*Ischemic\nN=' + n(this.nIschemic), level: 3, group: 0},
+          {id: 'Hemorrhagic', label: '*Hemorrhagic*\nN=' + n(this.nHemorrhagic), level: 2, group: 'out'},
+          {id: 'LVO', label: '*LVO*\nN=' + n(this.nLVO), level: 4},
+          {id: 'SVO', label: '*SVO*\nN=' + n(this.nSVO), level: 3, group: 'out'},
+          {id: 'Moderate', label: '*NIHSS > 6*\nN=' + n(this.nModerate), level: 5},
+          {id: 'Mild', label: '*NIHSS <= 6\nN=' + n(this.nMild), level: 4, group: 'out'},
+
+          {id: 'KTO', label: '*Onset or LSW < 12h*\nN=' + n(this.nKTO), level: 6},
+          {id: 'LT4h', label: '*Onset < 4h*\nN=' + n(this.nLT4h), level: 7},
+          {id: 'GT4h', label: '*Onset > 4h\nN=' + n(this.nGT4h), level: 7, group: 'late'},
+          {id: 'EarlyInclusion', label: '*mRS/ASPECTS*\nInclusion\nN=' + n(this.nEarlyExclusion), level: 8},
+          {id: 'EarlyExclusion', label: '*mRS/ASPECTS*\nExclusion\nN=' + n(this.nEarlyInclusion), level: 8, group: 'out'},
+          {id: 'PSIReqd', label: '*PSI Required*\nN=' + n(this.nPSIReqd), level: 9},
+          {id: 'PSINotReqd', label: '*Recannalized*\nN=' + n(this.nPSINotReqd), level: 9, group: 'out'},
+
+          {id: 'SUTO', label: '*Onset Unknown*\nN=' + n(this.nSUTO), level: 6, group: 'late'},
+          {id: 'TooLate', label: '*Too Late*\nN=' + n(this.nTotalPSI), level: 6, group: 'out'},
+          {id: 'Late', label: '*Late\nN=' + n(this.nLate), level: 7, group: 'late'},
+          {id: 'LateInclusion', label: '*mRS/ASPECTS*\nInclusion\nN=' + n(this.nLateInclusion), level: 8, group: 'late'},
+          {id: 'LateExclusion', label: '*mRS/ASPECTS*\nExclusion\nN=' + n(this.nLateExclusion), level: 8, group: 'out'},
+          {id: 'CTPGood', label: '*CTP Acceptable*\nN=' + n(this.nCTPGood), level: 9, group: 'late'},
+          {id: 'CTPBad', label: '*CTP Unfavourable*\nN=' + n(this.nCTPBad), level: 9, group: 'out'},
+
+          {id: 'TotalPSI', label: '*Total PSI*\nN=' + n(this.nTotalPSI), level: 10, group: 'end'}
+        ],
+        edges: [
+          {id: 'pAdults', from: 'Population', to: 'Adults', label: 'Adults ' + p(this.pAdults), value: 1.0},
+          {id: 'pStrokes', from: 'Adults', to: 'Strokes', label: 'Incidence\n' + this.pIncidence + '/100,000', value: 1.0},
+          {id: 'pIschemic', from: 'Strokes', to: 'Ischemic', label: p(this.pIschemic), value: this.pIschemic},
+          {id: 'pHemorrhagic', from: 'Strokes', to: 'Hemorrhagic', label: p(this.pHemorrhagic), value: this.pHemorrhagic},
+          {id: 'pLVO', from: 'Ischemic', to: 'LVO', label: p(this.pLVO), value: this.pLVO},
+          {id: 'pSVO', from: 'Ischemic', to: 'SVO', label: p(this.pSVO), value: this.pSVO},
+          {id: 'pModerate', from: 'LVO', to: 'Moderate', label: p(this.pModerate), value: this.pModerate},
+          {id: 'pMild', from: 'LVO', to: 'Mild', label: p(this.pMild), value: this.pMild},
+          {id: 'pKTO', from: 'Moderate', to: 'KTO', label: p(this.pKTO), value: this.pKTO},
+          {id: 'pSUTO', from: 'Moderate', to: 'SUTO', label: p(this.pSUTO), value: this.pSUTO},
+          {id: 'pGT12h', from: 'Moderate', to: 'TooLate', label: p(this.pGT12h), value: this.pGT12h},
+
+          {id: 'pLT4h', from: 'KTO', to: 'LT4h', label: p(this.pLT4h), value: this.pLT4h},
+          {id: 'pEarlyInclusion', from: 'LT4h', to: 'EarlyInclusion', label: p(this.pEarlyInclusion), value: this.pEarlyInclusion},
+          {id: 'pEarlyExclusion', from: 'LT4h', to: 'EarlyExclusion', label: p(this.pEarlyExclusion), value: this.pEarlyExclusion},
+          {id: 'pRecannalized', from: 'EarlyInclusion', to: 'PSINotReqd', label: p(this.pRecannalized), value: this.pRecannalized},
+          {id: 'pNotRecannalized', from: 'EarlyInclusion', to: 'PSIReqd', label: p(this.pNotRecannalized), value: this.pNotRecannalized},
+
+          {id: 'pGT4h', from: 'KTO', to: 'GT4h', label: p(this.pGT4h), value: this.pGT4h},
+          {id: 'late1', from: 'GT4h', to: 'Late', value: this.nGT4h / (this.nGT4h + this.nSUTO)},
+          {id: 'late2', from: 'SUTO', to: 'Late', value: this.nSUTO / (this.nGT4h + this.nSUTO)},
+          {id: 'pLateInclusion', from: 'Late', to: 'LateInclusion', label: p(this.pLateInclusion), value: this.pLateInclusion},
+          {id: 'pLateExclusion', from: 'Late', to: 'LateExclusion', label: p(this.pLateExclusion), value: this.pLateExclusion},
+          {id: 'pCTPBad', from: 'LateInclusion', to: 'CTPBad', label: p(this.pCTPBad), value: this.pCTPBad},
+          {id: 'pCTPGood', from: 'LateInclusion', to: 'CTPGood', label: p(this.pCTPGood), value: this.pCTPGood},
+
+          {id: 'Total1', from: 'PSIReqd', to: 'TotalPSI', value: this.nPSIReqd / (this.nPSIReqd + this.nCTPGood)},
+          {id: 'Total2', from: 'CTPGood', to: 'TotalPSI', value: this.nCTPGood / (this.nPSIReqd + this.nCTPGood)}
+        ]
+      }
+    }
   },
   mounted () {
     Toast.create({

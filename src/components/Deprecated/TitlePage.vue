@@ -2,7 +2,7 @@
   .layout-padding
     .row.lg-gutter.items-center.justify-center
       .col-3
-        img(src="../assets/nz-dhbs.jpg" class="responsive")
+        img(src="../../assets/nz-dhbs.jpg" class="responsive")
       .col-3(style="text-align: center")
         h3 Hyperacute Stroke
         h4 Intervention Estimator
