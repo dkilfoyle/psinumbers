@@ -179,7 +179,7 @@ export default {
       return this.numeral(this.getTotalIVT(sPopulations, this.population.growth, year) / 365.0).format('0.0')
     },
     getIVTperNight: function (sPopulations, year) {
-      return this.numeral(this.getTotalIVT(sPopulations, this.population.growth, year) / 365.0 * this.pOvernight).format('0.0')
+      return this.numeral(this.getTotalIVT(sPopulations, this.population.growth, year) / 365.0 * this.params.pOvernight.val).format('0.0')
     }
   }
 }
