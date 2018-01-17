@@ -40,19 +40,19 @@
             th Diversions
           tr(v-for="dhb in population.dhbs")
             td {{ dhb }}
-            td(v-for="year in tableYears") {{ getTotalDivert([dhb], year) }}
+            td.text-right(v-for="year in tableYears") {{ getTotalDivert([dhb], year) }}
           tr
             td Total
-            td(v-for="year in tableYears") {{ getTotalDivert(population.dhbs, year) }}
+            td.text-right(v-for="year in tableYears") {{ getTotalDivert(population.dhbs, year) }}
           
           tr(v-if="bDivertperDay")
             th Diversions/Day
           tr(v-if="bDivertperDay" v-for="dhb in population.dhbs")
             td {{ dhb }}
-            td(v-for="year in tableYears") {{ getDivertperDay([dhb], year) }}
+            td.text-right(v-for="year in tableYears") {{ getDivertperDay([dhb], year) }}
           tr(v-if="bDivertperDay")
             td Total
-            td(v-for="year in tableYears") {{ getDivertperDay(population.dhbs, year) }}
+            td.text-right(v-for="year in tableYears") {{ getDivertperDay(population.dhbs, year) }}
           
     div(slot="graph")
       flow-chart-viewer(title="PSI" :flowchartData="flowchartData" :presets=`[

@@ -47,37 +47,37 @@
             th IVT and PSI
           tr(v-if="bIVTandPSI" v-for="dhb in population.dhbs")
             td {{ dhb }}
-            td(v-for="year in tableYears") {{ getIVTPSI([dhb], year) }}
+            td.text-right(v-for="year in tableYears") {{ getIVTPSI([dhb], year) }}
           tr(v-if="bIVTandPSI")
             td Total
-            td(v-for="year in tableYears") {{ getIVTPSI(population.dhbs, year) }}
+            td.text-right(v-for="year in tableYears") {{ getIVTPSI(population.dhbs, year) }}
           
           tr
             th PSI (+/- IVT)
           tr(v-for="dhb in population.dhbs")
             td {{ dhb }}
-            td(v-for="year in tableYears") {{ getTotalPSI([dhb], year) }}
+            td.text-right(v-for="year in tableYears") {{ getTotalPSI([dhb], year) }}
           tr
             td Total
-            td(v-for="year in tableYears") {{ getTotalPSI(population.dhbs, year) }}
+            td.text-right(v-for="year in tableYears") {{ getTotalPSI(population.dhbs, year) }}
           
           tr(v-if="bPSIperDay")
             th PSI/Day
           tr(v-if="bPSIperDay" v-for="dhb in population.dhbs")
             td {{ dhb }}
-            td(v-for="year in tableYears") {{ getPSIperDay([dhb], year) }}
+            td.text-right(v-for="year in tableYears") {{ getPSIperDay([dhb], year) }}
           tr(v-if="bPSIperDay")
             td Total
-            td(v-for="year in tableYears") {{ getPSIperDay(population.dhbs, year) }}
+            td.text-right(v-for="year in tableYears") {{ getPSIperDay(population.dhbs, year) }}
           
           tr(v-if="bPSIperNight")
             th PSI/Night
           tr(v-if="bPSIperNight" v-for="dhb in population.dhbs")
             td {{ dhb }}
-            td(v-for="year in tableYears") {{ getPSIperNight([dhb], year) }}
+            td.text-right(v-for="year in tableYears") {{ getPSIperNight([dhb], year) }}
           tr(v-if="bPSIperNight")
             td Total
-            td(v-for="year in tableYears") {{ getPSIperNight(population.dhbs, year) }}
+            td.text-right(v-for="year in tableYears") {{ getPSIperNight(population.dhbs, year) }}
 
     div(slot="graph")         
       flow-chart-viewer(title="PSI" :flowchartData="flowchartData" :presets=`[

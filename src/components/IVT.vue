@@ -55,28 +55,28 @@
             th IVT
           tr(v-for="dhb in population.dhbs")
             td {{ dhb }}
-            td(v-for="year in tableYears") {{ getTotalIVT([dhb], year) }}
+            td.text-right(v-for="year in tableYears") {{ getTotalIVT([dhb], year) }}
           tr
             td Total
-            td(v-for="year in tableYears") {{ getTotalIVT(population.dhbs, year) }}
+            td.text-right(v-for="year in tableYears") {{ getTotalIVT(population.dhbs, year) }}
           
           tr(v-if="bIVTperDay")
             th PSI/Day
           tr(v-if="bIVTperDay" v-for="dhb in population.dhbs")
             td {{ dhb }}
-            td(v-for="year in tableYears") {{ getIVTperDay([dhb], year) }}
+            td.text-right(v-for="year in tableYears") {{ getIVTperDay([dhb], year) }}
           tr(v-if="bIVTperDay")
             td Total
-            td(v-for="year in tableYears") {{ getIVTperDay(population.dhbs, year) }}
+            td.text-right(v-for="year in tableYears") {{ getIVTperDay(population.dhbs, year) }}
           
           tr(v-if="bIVTperNight")
             th PSI/Night
           tr(v-if="bIVTperNight" v-for="dhb in population.dhbs")
             td {{ dhb }}
-            td(v-for="year in tableYears") {{ getIVTperNight([dhb], year) }}
+            td.text-right(v-for="year in tableYears") {{ getIVTperNight([dhb], year) }}
           tr(v-if="bIVTperNight")
             td Total
-            td(v-for="year in tableYears") {{ getIVTperNight(population.dhbs, year) }}
+            td.text-right(v-for="year in tableYears") {{ getIVTperNight(population.dhbs, year) }}
 
     div(slot="graph")
       flow-chart-viewer(title="PSI" :flowchartData="flowchartData" :presets=`[]`)
