@@ -72,6 +72,9 @@ export default {
           },
           font: {
             background: '#eeeeee'
+          },
+          arrows: {
+            to: {enabled: true, scaleFactor: 0.5, type: 'arrow'}
           }
         },
         groups: {
