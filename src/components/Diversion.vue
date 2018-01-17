@@ -95,7 +95,7 @@ export default {
       paramGroups: [
         { label: 'Onset Time', icon: 'timelapse' },
         { label: 'Clinical', icon: 'favorite' }],
-      population: { regions: ['Metro'], dhbs: ['Auckland', 'Counties Manukau', 'Waitemata'], year: '2018' },
+      population: { regions: [], dhbs: ['Counties Manukau', 'Waitemata'], year: '2018' },
       params: Params,
       DHBs: DHBs
     }
@@ -161,15 +161,13 @@ export default {
   },
   methods: {
     resetDefaults: function () {
-      this.population.regions = ['Metro']
-      this.population.dhbs = ['Auckland', 'Counties Manukau', 'Waitemata']
-      this.population.year = '2018'
-      this.params.pAdults.val = 0.8
-      this.params.pIncidence.val = 192
-      this.params.pHyperacute.val = 0.55
-      this.params.pAfterhours.val = 0.61
-      this.params.pPASTAPos.val = 0.65
-      this.params.pMimics.val = 0.37
+      this.population.regions = []
+      this.population.dhbs = ['Counties Manukau', 'Waitemata']
+      this.population.year = 2018
+      var self = this
+      Object.keys(this.params).forEach(function (paramName) {
+        self.params[paramName].val = self.params[paramName].default
+      })
     },
     getCalculatedPopulation: function (dhbs, growth, year) {
       var x = 0
