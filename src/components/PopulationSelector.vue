@@ -60,11 +60,13 @@ export default {
       this.sDHBs = this.value.dhbs
     },
     sRegions: function (newRegions) {
-      var self = this
-      this.sDHBs = []
-      newRegions.forEach(function (region) {
-        self.sDHBs = self.sDHBs.concat(self.getRegionDHBs(region))
-      })
+      if (newRegions.length > 0) {
+        var self = this
+        this.sDHBs = []
+        newRegions.forEach(function (region) {
+          self.sDHBs = self.sDHBs.concat(self.getRegionDHBs(region))
+        })
+      }
     },
     getCalculatedN: function (newn) {
       this.$emit('input', {
