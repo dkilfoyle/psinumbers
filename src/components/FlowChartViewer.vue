@@ -33,13 +33,16 @@ export default {
     flowchartId: function () { return 'flowchart' + this.title }
   },
   mounted () {
-    this.renderFlowchart()
+    this.renderFlowchart(false)
   },
   watch: {
-    flowchartData: function () { this.renderFlowchart() }
+    flowchartData: function () { this.renderFlowchart(true) }
   },
   methods: {
-    renderFlowchart: function () {
+    onResize: function () {
+      this.renderFlowchart(false)
+    },
+    renderFlowchart: function (bPreservePanZoom) {
       var container = document.getElementById(this.flowchartId)
       if (container === null) return // catch resize events when the tab is changed to table
       var nodes = new vis.DataSet(this.flowchartData.nodes)
@@ -124,10 +127,22 @@ export default {
         }
       }
 
+      var viewportPosition
+      var scale
+      if (bPreservePanZoom) {
+        viewportPosition = this.flowchartObject.getViewPosition()
+        scale = this.flowchartObject.getScale()
+      }
+
       this.flowchartObject = new vis.Network(container, data, options)
-    },
-    onResize: function () {
-      this.renderFlowchart()
+
+      if (bPreservePanZoom) {
+        this.flowchartObject.moveTo({
+          position: viewportPosition,
+          scale: scale,
+          animation: false
+        })
+      }
     },
     fit: function () {
       this.flowchartObject.fit({animation: true})
