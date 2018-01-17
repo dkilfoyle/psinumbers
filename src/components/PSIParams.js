@@ -1,8 +1,8 @@
 module.exports = {
-  pAdults: { name: 'pAdults', val: 0.8, default: 0.8, group: 'Demographics', label: 'Adults %', helper: '% of population that are aged >= 15y' },
+  pAdults: { name: 'pAdults', val: 0.8, default: 0.8, group: 'Demographics', label: 'Adults', helper: '% of population that are aged >= 15y' },
   pIncidence: { name: 'pIncidence', val: 192, default: 192, type: 'number', group: 'Demographics', label: 'Stroke Incidence', helper: 'Number of strokes/100,000 adults /yr' },
 
-  pIschemic: { name: 'pIschemic', val: 0.81, default: 0.81, group: 'Radiology', label: 'Ischemic %', helper: '% of all strokes that are ischemic' },
+  pIschemic: { name: 'pIschemic', val: 0.81, default: 0.81, group: 'Radiology', label: 'Ischemic', helper: '% of all strokes that are ischemic' },
   pLVO: { name: 'pLVO', val: 0.40, default: 0.40, group: 'Radiology', label: 'LVO %', helper: '% of all strokes that are ischemic' },
 
   pModerate: { name: 'pModerate', val: 0.8, default: 0.8, group: 'Clinical', label: 'Moderate+ Deficit', helper: '% of LVO with NIHSS >= 6' },

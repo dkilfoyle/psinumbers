@@ -7,20 +7,15 @@
 
         q-collapsible(group="parameters" label="Demographics" icon="people" separator)
           population-selector(v-model="population")
-          q-field(label="Adults %" helper="Proportion of population >= 15y")
-            q-slider(v-model="pAdults" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pAdults*100)}%`")
-          q-field(label="Stroke Incidence" helper="Number of strokes/100,000 adults /yr")
-            q-input(v-model="pIncidence")
+          q-field(v-for="param in Object.values(params).filter(p => p.group === 'Demographics')" :key="param.name" :label="param.label" :helper="param.helper")
+            q-slider(v-if="param.type===undefined" v-model="param.val" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(param.val*100)}%`")
+            q-input(v-if="param.type==='number'" v-model="param.val")
 
-        q-collapsible(group="parameters" label="Clinical" icon="favorite" separator)
-          q-field(label="Hyper-acute %" helper="% of all strokes that are hyperacute")
-            q-slider(v-model="pHyperacute" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pHyperacute*100)}%`")
-          q-field(label="After-hours %" helper="% of hyperacute stroke that present after-hours")
-            q-slider(v-model="pAfterhours" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pAfterhours*100)}%`")
-          q-field(label="PASTA Positive %" helper="% of hyperacute stroke that pass the PASTA screen")
-            q-slider(v-model="pPASTAPos" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pPASTAPos*100)}%`")
-          q-field(label="Mimics %" helper="Ratio as % of hyperacute stroke that are mimics")
-            q-slider(v-model="pMimics" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(pMimics*100)}%`")
+        q-collapsible(v-for="paramGroup in paramGroups" :key="paramGroup.label" group="parameters" :label="paramGroup.label" :icon="paramGroup.icon" separator)
+          q-field(v-for="param in Object.values(params).filter(p => p.group === paramGroup.label)" :key="param.name" :label="param.label" :helper="param | getHelper")
+            q-slider(v-if="param.type===undefined" v-model="param.val" :min="0.00" :max="1.0" :step="0.01" :decimals="2" label-always :label-value="`${Math.round(param.val*100)}%`")
+            q-input(v-if="param.type==='number'" v-model="param.val")
+
         q-collapsible(group="parameters" label="Defaults" icon="settings" separator)
           q-btn(@click="resetDefaults()" color="secondary" class="full-width") Reset All
 
@@ -74,6 +69,8 @@ import PopulationSelector from './PopulationSelector'
 import FlowChartViewer from './FlowChartViewer'
 import numeral from 'numeral'
 import DHBs from './dhbs.js'
+import Params from './DiversionParams'
+import paramFilters from './paramFilters'
 
 var n = function (mynum) { return numeral(mynum).format('0,0') }
 var p = function (mynum) { return numeral(mynum).format('0%') }
@@ -83,40 +80,40 @@ export default {
   components: {
     MyLayout, PopulationSelector, QTooltip, FlowChartViewer, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCollapsible, QSelect, QRadio, QCheckbox
   },
+  mixins: [ paramFilters ],
   data () {
     return {
       numeral: numeral,
       bDivertperDay: false,
       bDivertperNight: false,
       tableYears: [2018, 2019, 2020, 2021, 2022],
+      paramGroups: [
+        { label: 'Radiology', icon: 'scanner' },
+        { label: 'Clinical', icon: 'favorite' },
+        { label: 'Onset Time', icon: 'timelapse' }],
       population: { regions: ['Metro'], dhbs: ['Auckland', 'Counties Manukau', 'Waitemata'], year: '2018' },
-      pAdults: 0.8,
-      pIncidence: 192,
-      pHyperacute: 0.55,
-      pAfterhours: 0.61,
-      pPASTAPos: 0.65,
-      pMimics: 0.37,
+      params: Params,
       DHBs: DHBs
     }
   },
   computed: {
     nPopulation: function () { return this.getCalculatedPopulation(this.population.dhbs, this.population.growth, this.population.year) },
-    nAdults: function () { return Math.round(this.nPopulation * this.pAdults) },
-    nStrokes: function () { return Math.round(this.nAdults * (this.pIncidence / 100000)) },
+    nAdults: function () { return Math.round(this.nPopulation * this.params.pAdults.val) },
+    nStrokes: function () { return Math.round(this.nAdults * (this.params.pIncidence.val / 100000)) },
 
-    nHyperacute: function () { return Math.round(this.nStrokes * this.pHyperacute) },
-    pNonacute: function () { return (1.0 - this.pHyperacute) },
+    nHyperacute: function () { return Math.round(this.nStrokes * this.params.pHyperacute.val) },
+    pNonacute: function () { return (1.0 - this.params.pHyperacute.val) },
     nNonacute: function () { return Math.round(this.nStrokes * this.pNonacute) },
 
-    nAfterhours: function () { return Math.round(this.nHyperacute * this.pAfterhours) },
-    pInhours: function () { return (1.0 - this.pAfterhours) },
+    nAfterhours: function () { return Math.round(this.nHyperacute * this.params.pAfterhours.val) },
+    pInhours: function () { return (1.0 - this.params.pAfterhours.val) },
     nInhours: function () { return Math.round(this.nHyperacute * this.pInhours) },
 
-    nPASTAPos: function () { return Math.round(this.nAfterhours * this.pPASTAPos) },
-    pPASTANeg: function () { return (1.0 - this.pPASTAPos) },
+    nPASTAPos: function () { return Math.round(this.nAfterhours * this.params.pPASTAPos.val) },
+    pPASTANeg: function () { return (1.0 - this.params.pPASTAPos.val) },
     nPASTANeg: function () { return Math.round(this.nAfterhours * this.pPASTANeg) },
 
-    nMimics: function () { return Math.round(this.nPASTAPos * this.pMimics) },
+    nMimics: function () { return Math.round(this.nPASTAPos * this.params.pMimics.val) },
     nDivert: function () { return Math.round(this.nPASTAPos + this.nMimics) },
 
     flowchartData: function () {
@@ -136,15 +133,15 @@ export default {
           {id: 'Divert', label: '*Divert*\nN=' + n(this.nDivert), level: 6, group: 'end'}
         ],
         edges: [
-          {id: 'pAdults', from: 'Population', to: 'Adults', label: 'Adults ' + p(this.pAdults), value: 1.0},
-          {id: 'pStrokes', from: 'Adults', to: 'Strokes', label: 'Incidence\n' + this.pIncidence + '/100,000', value: 1.0},
-          {id: 'pHyperacute', from: 'Strokes', to: 'Hyperacute', label: p(this.pHyperacute), value: this.pHyperacute},
+          {id: 'pAdults', from: 'Population', to: 'Adults', label: 'Adults ' + p(this.params.pAdults.val), value: 1.0},
+          {id: 'pStrokes', from: 'Adults', to: 'Strokes', label: 'Incidence\n' + this.params.pIncidence.val + '/100,000', value: 1.0},
+          {id: 'pHyperacute', from: 'Strokes', to: 'Hyperacute', label: p(this.params.pHyperacute.val), value: this.params.pHyperacute.val},
           {id: 'pNonacute', from: 'Strokes', to: 'Nonacute', label: p(this.pNonacute), value: this.pNonacute},
-          {id: 'pAfterhours', from: 'Hyperacute', to: 'Afterhours', label: p(this.pAfterhours), value: this.pAfterhours},
+          {id: 'pAfterhours', from: 'Hyperacute', to: 'Afterhours', label: p(this.params.pAfterhours.val), value: this.params.pAfterhours.val},
           {id: 'pInhours', from: 'Hyperacute', to: 'Inhours', label: p(this.pInhours), value: this.pInhours},
-          {id: 'pPASTAPos', from: 'Afterhours', to: 'PASTAPos', label: p(this.pPASTAPos), value: this.pPASTAPos},
+          {id: 'pPASTAPos', from: 'Afterhours', to: 'PASTAPos', label: p(this.params.pPASTAPos.val), value: this.params.pPASTAPos.val},
           {id: 'pPASTANeg', from: 'Afterhours', to: 'PASTANeg', label: p(this.pPASTANeg), value: this.pPASTANeg},
-          {id: 'pMimics', from: 'PASTAPos', to: 'Mimics', label: p(this.pMimics), value: this.pMimics},
+          {id: 'pMimics', from: 'PASTAPos', to: 'Mimics', label: p(this.params.pMimics.val), value: this.params.pMimics.val},
           {id: 'pDivert1', from: 'PASTAPos', to: 'Divert'},
           {id: 'pDivert2', from: 'Mimics', to: 'Divert'}
         ]
@@ -163,12 +160,12 @@ export default {
       this.population.regions = ['Metro']
       this.population.dhbs = ['Auckland', 'Counties Manukau', 'Waitemata']
       this.population.year = '2018'
-      this.pAdults = 0.8
-      this.pIncidence = 192
-      this.pHyperacute = 0.55
-      this.pAfterhours = 0.61
-      this.pPASTAPos = 0.65
-      this.pMimics = 0.37
+      this.params.pAdults.val = 0.8
+      this.params.pIncidence.val = 192
+      this.params.pHyperacute.val = 0.55
+      this.params.pAfterhours.val = 0.61
+      this.params.pPASTAPos.val = 0.65
+      this.params.pMimics.val = 0.37
     },
     getCalculatedPopulation: function (dhbs, growth, year) {
       var x = 0
@@ -180,8 +177,8 @@ export default {
     },
     getTotalDivert: function (sPopulations, year) {
       var x = this.getCalculatedPopulation(sPopulations, this.population.growth, year)
-      x = x * this.pAdults * (this.pIncidence / 100000) * this.pHyperacute * this.pAfterhours * this.pPASTAPos
-      x = x + (x * this.pMimics)
+      x = x * this.params.pAdults.val * (this.params.pIncidence.val / 100000) * this.params.pHyperacute.val * this.params.pAfterhours.val * this.params.pPASTAPos.val
+      x = x + (x * this.params.pMimics.val)
       return Math.round(x)
     },
     getDivertperDay: function (sPopulations, year) {
