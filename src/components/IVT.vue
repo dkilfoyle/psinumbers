@@ -91,6 +91,7 @@ import FlowChartViewer from './FlowChartViewer'
 import numeral from 'numeral'
 import DHBs from './dhbs'
 import Params from './IVTParams'
+import paramFilters from './paramFilters'
 
 var n = function (mynum) { return numeral(mynum).format('0,0') }
 var p = function (mynum) { return numeral(mynum).format('0%') }
@@ -113,18 +114,7 @@ export default {
       DHBs: DHBs
     }
   },
-  filters: {
-    getHelper: function (param) {
-      var x = ''
-      if (param.type === undefined) {
-        x = param.helper + ' (' + numeral(param.default).format('0%') + ')'
-      }
-      else {
-        x = param.helper + ' (' + param.default + ')'
-      }
-      return (x)
-    }
-  },
+  mixins: [ paramFilters ],
   computed: {
     nPopulation: function () { return this.getCalculatedPopulation(this.population.dhbs, this.population.growth, this.population.year) },
     nAdults: function () { return Math.round(this.nPopulation * this.params.pAdults.val) },

@@ -127,8 +127,6 @@ export default {
       this.flowchartObject = new vis.Network(container, data, options)
     },
     onResize: function () {
-      console.log('resize')
-      console.log(this.flowchartObject)
       this.renderFlowchart()
     },
     fit: function () {
