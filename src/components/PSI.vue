@@ -36,7 +36,7 @@
             q-input(v-model="dhb.n" type="number")
 
     div(slot="table")
-
+      custom-param-table(v-if="bShowCustomParams" :params="params" :population="population")
       table.q-table.horizontal-separator
         thead
           tr
@@ -93,6 +93,7 @@ import { Toast, QTooltip, QIcon, QList, QItem, QItemMain, QListHeader, QItemSepa
 import MyLayout from './MyLayout'
 import PopulationSelector from './PopulationSelector'
 import FlowChartViewer from './FlowChartViewer'
+import CustomParamTable from './CustomParamTable'
 import numeral from 'numeral'
 import DHBs from './dhbs.js'
 import Params from './PSIParams'
@@ -104,7 +105,7 @@ var p = function (mynum) { return numeral(mynum).format('0%') }
 export default {
   name: 'psi',
   components: {
-    FlowChartViewer, MyLayout, PopulationSelector, QTooltip, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCollapsible, QSelect, QRadio, QCheckbox
+    CustomParamTable, FlowChartViewer, MyLayout, PopulationSelector, QTooltip, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCollapsible, QSelect, QRadio, QCheckbox
   },
   mixins: [ paramFilters ],
   data () {

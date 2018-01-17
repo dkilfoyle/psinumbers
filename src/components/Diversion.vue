@@ -23,6 +23,8 @@
         q-list-header Settings
         q-item-separator
         q-collapsible(group="settings" label="Table" icon="view_quilt" separator)
+          q-field(label="Show Custom Parameters" helper="Show parameters that vary from defaults")
+            q-checkbox(v-model="bShowCustomParams")
           q-field(label="Divert per 24h day" helper="PSI cases per 24h day")
             q-checkbox(v-model="bDivertperDay")
         q-collapsible(group="settings" label="Populations" icon="local_hospital" separator)
@@ -30,6 +32,7 @@
             q-input(v-model="dhb.n" type="number")
 
     div(slot="table")
+      custom-param-table(v-if="bShowCustomParams" :params="params" :population="population")
       table.q-table.horizontal-separator
         thead
           tr
@@ -55,7 +58,7 @@
             td.text-right(v-for="year in tableYears") {{ getDivertperDay(population.dhbs, year) }}
           
     div(slot="graph")
-      flow-chart-viewer(title="PSI" :flowchartData="flowchartData" :presets=`[
+      flow-chart-viewer(title="Diversion" :flowchartData="flowchartData" :presets=`[
         { label: 'Zoom: Demographics', icon: 'people', nodes: ['Population', 'Adults', 'Strokes'] },
         { label: 'Zoom: Hyperacute', icon: 'timer', nodes: ['Hyperacute', 'Divert'] },
       ]`)
@@ -67,6 +70,7 @@ import { Toast, QTooltip, QIcon, QList, QItem, QItemMain, QListHeader, QItemSepa
 import MyLayout from './MyLayout'
 import PopulationSelector from './PopulationSelector'
 import FlowChartViewer from './FlowChartViewer'
+import CustomParamTable from './CustomParamTable'
 import numeral from 'numeral'
 import DHBs from './dhbs.js'
 import Params from './DiversionParams'
@@ -78,7 +82,7 @@ var p = function (mynum) { return numeral(mynum).format('0%') }
 export default {
   name: 'ivt',
   components: {
-    MyLayout, PopulationSelector, QTooltip, FlowChartViewer, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCollapsible, QSelect, QRadio, QCheckbox
+    CustomParamTable, MyLayout, PopulationSelector, QTooltip, FlowChartViewer, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCollapsible, QSelect, QRadio, QCheckbox
   },
   mixins: [ paramFilters ],
   data () {
@@ -86,11 +90,11 @@ export default {
       numeral: numeral,
       bDivertperDay: false,
       bDivertperNight: false,
+      bShowCustomParams: false,
       tableYears: [2018, 2019, 2020, 2021, 2022],
       paramGroups: [
-        { label: 'Radiology', icon: 'scanner' },
-        { label: 'Clinical', icon: 'favorite' },
-        { label: 'Onset Time', icon: 'timelapse' }],
+        { label: 'Onset Time', icon: 'timelapse' },
+        { label: 'Clinical', icon: 'favorite' }],
       population: { regions: ['Metro'], dhbs: ['Auckland', 'Counties Manukau', 'Waitemata'], year: '2018' },
       params: Params,
       DHBs: DHBs
@@ -182,10 +186,10 @@ export default {
       return Math.round(x)
     },
     getDivertperDay: function (sPopulations, year) {
-      return this.numeral(this.getTotalDivert(sPopulations, this.population.growth, year) / 365.0).format('0.0')
+      return this.numeral(this.getTotalDivert(sPopulations, year) / 365.0).format('0.0')
     },
     getDivertperNight: function (sPopulations, year) {
-      return this.numeral(this.getTotalDivert(sPopulations, this.population.growth, year) / 365.0 * this.pOvernight).format('0.0')
+      return this.numeral(this.getTotalDivert(sPopulations, year) / 365.0 * this.pOvernight).format('0.0')
     }
   }
 }

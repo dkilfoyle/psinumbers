@@ -25,26 +25,16 @@
         q-collapsible(group="settings" label="Table" icon="view_quilt" separator)
           q-field(label="Show Custom Parameters" helper="Show parameters that vary from defaults")
             q-checkbox(v-model="bShowCustomParams")
-          q-field(label="IVT per 24h day" helper="PSI cases per 24h day")
+          q-field(label="IVT per 24h day" helper="IVT cases per 24h day")
             q-checkbox(v-model="bIVTperDay")
-          q-field(label="IVT per Night" helper="PSI cases per overnight")
+          q-field(label="IVT per Night" helper="IVT cases per overnight")
             q-checkbox(v-model="bIVTperNight")
         q-collapsible(group="settings" label="Populations" icon="local_hospital" separator)
           q-field(:label="dhb.label" v-for="dhb in DHBs" :key="dhb.label")
             q-input(v-model="dhb.n" type="number")
 
     div(slot="table")
-      table.q-table.horizonal-separator.bordered(v-if="bShowCustomParams" style="margin-bottom: 20px")
-        thead
-          tr
-            th Parameter
-            th Setting
-        tbody
-          tr(v-for="param in params" v-if="param.val !== param.default")
-            td {{ param.label }}
-            td {{ param.val }}
-          tr(v-if="Object.values(params).find(x => x.val === x.default) === undefined")
-            td No custom parameters
+      custom-param-table(v-if="bShowCustomParams" :params="params" :population="population")
       table.q-table.horizontal-separator
         thead
           tr
@@ -61,7 +51,7 @@
             td.text-right(v-for="year in tableYears") {{ getTotalIVT(population.dhbs, year) }}
           
           tr(v-if="bIVTperDay")
-            th PSI/Day
+            th IVT/Day
           tr(v-if="bIVTperDay" v-for="dhb in population.dhbs")
             td {{ dhb }}
             td.text-right(v-for="year in tableYears") {{ getIVTperDay([dhb], year) }}
@@ -70,7 +60,7 @@
             td.text-right(v-for="year in tableYears") {{ getIVTperDay(population.dhbs, year) }}
           
           tr(v-if="bIVTperNight")
-            th PSI/Night
+            th IVT/Night
           tr(v-if="bIVTperNight" v-for="dhb in population.dhbs")
             td {{ dhb }}
             td.text-right(v-for="year in tableYears") {{ getIVTperNight([dhb], year) }}
@@ -92,6 +82,7 @@ import numeral from 'numeral'
 import DHBs from './dhbs'
 import Params from './IVTParams'
 import paramFilters from './paramFilters'
+import CustomParamTable from './CustomParamTable'
 
 var n = function (mynum) { return numeral(mynum).format('0,0') }
 var p = function (mynum) { return numeral(mynum).format('0%') }
@@ -99,12 +90,12 @@ var p = function (mynum) { return numeral(mynum).format('0%') }
 export default {
   name: 'ivt',
   components: {
-    FlowChartViewer, MyLayout, PopulationSelector, QTooltip, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCollapsible, QSelect, QRadio, QCheckbox
+    CustomParamTable, FlowChartViewer, MyLayout, PopulationSelector, QTooltip, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCollapsible, QSelect, QRadio, QCheckbox
   },
   data () {
     return {
       numeral: numeral,
-      bIVTperDay: false,
+      bIVTperDay: true,
       bIVTperNight: false,
       bShowCustomParams: false,
       tableYears: [2018, 2019, 2020, 2021, 2022],
@@ -176,10 +167,10 @@ export default {
       return Math.round(x)
     },
     getIVTperDay: function (sPopulations, year) {
-      return this.numeral(this.getTotalIVT(sPopulations, this.population.growth, year) / 365.0).format('0.0')
+      return this.numeral(this.getTotalIVT(sPopulations, year) / 365.0).format('0.0')
     },
     getIVTperNight: function (sPopulations, year) {
-      return this.numeral(this.getTotalIVT(sPopulations, this.population.growth, year) / 365.0 * this.params.pOvernight.val).format('0.0')
+      return this.numeral(this.getTotalIVT(sPopulations, year) / 365.0 * this.params.pOvernight.val).format('0.0')
     }
   }
 }
