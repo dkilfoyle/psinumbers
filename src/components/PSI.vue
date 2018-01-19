@@ -17,6 +17,10 @@
             q-input(v-if="param.type==='number'" v-model="param.val")
 
         q-collapsible(group="parameters" label="Defaults" icon="settings" separator)
+          q-field(label="Remoteness Adjuster" helper="Adjust parameters for remote populations. Decrease hyperacute % and increase time delays")
+            q-checkbox(v-model="bRemoteness")
+          q-field(label="Availability Filter" helper="Reduce availability to in-hours only")
+            q-checkbox(v-model="bAvailability")
           q-btn(@click="resetDefaults()" color="secondary" class="full-width") Reset All
 
       q-list
@@ -114,7 +118,9 @@ export default {
       bIVTandPSI: false,
       bPSIperDay: true,
       bPSIperNight: true,
-      bShowCustomParams: false,
+      bShowCustomParams: true,
+      bRemoteness: false,
+      bAvailability: false,
       tableYears: [2018, 2019, 2020, 2021, 2022],
       paramGroups: [
         { label: 'Radiology', icon: 'scanner' },
@@ -133,17 +139,21 @@ export default {
     nAdults: function () { return (this.nPopulation * this.params.pAdults.val) },
     nStrokes: function () { return (this.nAdults * (this.params.pIncidence.val / 100000)) },
 
-    nIschemic: function () { return (this.nStrokes * this.params.pIschemic.val) },
+    nAvailability: function () { return (this.nStrokes * this.getAvailability(this.population.year)) },
+    pNoAvailability: function () { return (1.0 - this.getAvailability(this.population.year)) },
+    nNoAvailability: function () { return (this.nStrokes * this.pNoAvailability) },
+
+    nIschemic: function () { return (this.nAvailability * this.params.pIschemic.val) },
     pHemorrhagic: function () { return (1.0 - this.params.pIschemic.val) },
-    nHemorrhagic: function () { return (this.nStrokes * this.pHemorrhagic.val) },
+    nHemorrhagic: function () { return (this.nAvailability * this.pHemorrhagic) },
 
     nLVO: function () { return (this.nIschemic * this.params.pLVO.val) },
     pSVO: function () { return (1.0 - this.params.pLVO.val) },
-    nSVO: function () { return (this.nIschemic * this.pSVO.val) },
+    nSVO: function () { return (this.nIschemic * this.pSVO) },
 
     nModerate: function () { return (this.nLVO * this.params.pModerate.val) },
     pMild: function () { return (1.0 - this.params.pModerate.val) },
-    nMild: function () { return (this.nLVO * this.pMild.val) },
+    nMild: function () { return (this.nLVO * this.pMild) },
 
     nKTO: function () { return (this.nModerate * this.params.pKTO.val) },
     nLT4h: function () { return (this.nKTO * this.params.pLT4h.val) },
@@ -158,7 +168,7 @@ export default {
     nGT4h: function () { return (this.nKTO * this.pGT4h) },
     nSUTO: function () { return (this.nModerate * this.params.pSUTO.val) },
     nLate: function () { return (this.nGT4h + this.nSUTO) },
-    pGT12h: function () { return (1.0 - this.params.pKTO - this.params.pSUTO.val) },
+    pGT12h: function () { return (1.0 - this.params.pKTO.val - this.params.pSUTO.val) },
     nTooLate: function () { return (this.nModerate - this.params.pGT12h.val) },
 
     nLateInclusion: function () { return (this.nLate * this.params.pLateInclusion.val) },
@@ -176,43 +186,48 @@ export default {
           {id: 'Population', label: '*Population*\nN=' + n(this.nPopulation), level: 0, shape: 'ellipse', font: {multi: 'md'}, group: 'end'},
           {id: 'Adults', label: '*Adults*\nN=' + n(this.nAdults), level: 1, group: 0},
           {id: 'Strokes', label: '*Strokes*\nN=' + n(this.nStrokes), level: 2, group: 0},
-          {id: 'Ischemic', label: '*Ischemic\nN=' + n(this.nIschemic), level: 3, group: 0},
-          {id: 'Hemorrhagic', label: '*Hemorrhagic*\nN=' + n(this.nHemorrhagic), level: 2, group: 'out'},
-          {id: 'LVO', label: '*LVO*\nN=' + n(this.nLVO), level: 4},
-          {id: 'SVO', label: '*SVO*\nN=' + n(this.nSVO), level: 3, group: 'out'},
-          {id: 'Moderate', label: '*NIHSS > 6*\nN=' + n(this.nModerate), level: 5},
-          {id: 'Mild', label: '*NIHSS <= 6\nN=' + n(this.nMild), level: 4, group: 'out'},
+          {id: 'Availability', label: '*Resources*\nAvailable\nN=' + n(this.nAvailability), level: 3, group: 0},
+          {id: 'NoAvailability', label: '*Resources*\nNot Available\nN=' + n(this.nNoAvailability), level: 2, group: 'out'},
+          {id: 'Ischemic', label: '*Ischemic\nN=' + n(this.nIschemic), level: 4, group: 0},
+          {id: 'Hemorrhagic', label: '*Hemorrhagic*\nN=' + n(this.nHemorrhagic), level: 3, group: 'out'},
+          {id: 'LVO', label: '*LVO*\nN=' + n(this.nLVO), level: 5},
+          {id: 'SVO', label: '*SVO*\nN=' + n(this.nSVO), level: 4, group: 'out'},
+          {id: 'Moderate', label: '*NIHSS > 6*\nN=' + n(this.nModerate), level: 6},
+          {id: 'Mild', label: '*NIHSS <= 6\nN=' + n(this.nMild), level: 5, group: 'out'},
 
-          {id: 'KTO', label: '*Onset or LSW < 12h*\nN=' + n(this.nKTO), level: 6},
-          {id: 'LT4h', label: '*Onset < 4h*\nN=' + n(this.nLT4h), level: 7},
-          {id: 'GT4h', label: '*Onset > 4h\nN=' + n(this.nGT4h), level: 7, group: 'late'},
-          {id: 'EarlyInclusion', label: '*mRS/ASPECTS*\nInclusion\nN=' + n(this.nEarlyExclusion), level: 8},
-          {id: 'EarlyExclusion', label: '*mRS/ASPECTS*\nExclusion\nN=' + n(this.nEarlyInclusion), level: 8, group: 'out'},
-          {id: 'PSIReqd', label: '*PSI Required*\nN=' + n(this.nPSIReqd), level: 9},
-          {id: 'PSINotReqd', label: '*Recannalized*\nN=' + n(this.nPSINotReqd), level: 9, group: 'out'},
+          {id: 'KTO', label: '*Onset or LSW < 12h*\nN=' + n(this.nKTO), level: 7},
+          {id: 'LT4h', label: '*Onset < 4h*\nN=' + n(this.nLT4h), level: 8},
+          {id: 'GT4h', label: '*Onset > 4h\nN=' + n(this.nGT4h), level: 8, group: 'late'},
+          {id: 'EarlyInclusion', label: '*mRS/ASPECTS*\nInclusion\nN=' + n(this.nEarlyExclusion), level: 9},
+          {id: 'EarlyExclusion', label: '*mRS/ASPECTS*\nExclusion\nN=' + n(this.nEarlyInclusion), level: 9, group: 'out'},
+          {id: 'PSIReqd', label: '*PSI Required*\nN=' + n(this.nPSIReqd), level: 10},
+          {id: 'PSINotReqd', label: '*Recannalized*\nN=' + n(this.nPSINotReqd), level: 10, group: 'out'},
 
-          {id: 'SUTO', label: '*Onset Unknown*\nN=' + n(this.nSUTO), level: 6, group: 'late'},
-          {id: 'TooLate', label: '*Too Late*\nN=' + n(this.nTotalPSI), level: 6, group: 'out'},
-          {id: 'Late', label: '*Late\nN=' + n(this.nLate), level: 7, group: 'late'},
-          {id: 'LateInclusion', label: '*mRS/ASPECTS*\nInclusion\nN=' + n(this.nLateInclusion), level: 8, group: 'late'},
-          {id: 'LateExclusion', label: '*mRS/ASPECTS*\nExclusion\nN=' + n(this.nLateExclusion), level: 8, group: 'out'},
-          {id: 'CTPGood', label: '*CTP Acceptable*\nN=' + n(this.nCTPGood), level: 9, group: 'late'},
-          {id: 'CTPBad', label: '*CTP Unfavourable*\nN=' + n(this.nCTPBad), level: 9, group: 'out'},
+          {id: 'SUTO', label: '*Onset Unknown*\nN=' + n(this.nSUTO), level: 7, group: 'late'},
+          {id: 'TooLate', label: '*Too Late*\nN=' + n(this.nTotalPSI), level: 7, group: 'out'},
+          {id: 'Late', label: '*Late\nN=' + n(this.nLate), level: 8, group: 'late'},
+          {id: 'LateInclusion', label: '*mRS/ASPECTS*\nInclusion\nN=' + n(this.nLateInclusion), level: 9, group: 'late'},
+          {id: 'LateExclusion', label: '*mRS/ASPECTS*\nExclusion\nN=' + n(this.nLateExclusion), level: 9, group: 'out'},
+          {id: 'CTPGood', label: '*CTP Acceptable*\nN=' + n(this.nCTPGood), level: 10, group: 'late'},
+          {id: 'CTPBad', label: '*CTP Unfavourable*\nN=' + n(this.nCTPBad), level: 10, group: 'out'},
 
-          {id: 'TotalPSI', label: '*Total PSI*\nN=' + n(this.nTotalPSI), level: 10, group: 'end'}
+          {id: 'TotalPSI', label: '*Total PSI*\nN=' + n(this.nTotalPSI), level: 11, group: 'end'}
         ],
         edges: [
           {id: 'pAdults', from: 'Population', to: 'Adults', label: 'Adults ' + p(this.params.pAdults.val), value: 1.0},
           {id: 'pStrokes', from: 'Adults', to: 'Strokes', label: 'Incidence\n' + this.params.pIncidence.val + '/100,000', value: 1.0},
-          {id: 'pIschemic', from: 'Strokes', to: 'Ischemic', label: p(this.params.pIschemic.val), value: this.params.pIschemic.val},
-          {id: 'pHemorrhagic', from: 'Strokes', to: 'Hemorrhagic', label: p(this.pHemorrhagic), value: this.pHemorrhagic},
+          {id: 'pAvailability', from: 'Strokes', to: 'Availability', label: p(this.getAvailability(this.population.year)), value: this.getAvailability(this.population.year)},
+          {id: 'pNoAvailability', from: 'Strokes', to: 'NoAvailability', label: p(this.pNoAvailability), value: this.pNoAvailability},
+          {id: 'pIschemic', from: 'Availability', to: 'Ischemic', label: p(this.params.pIschemic.val), value: this.params.pIschemic.val},
+          {id: 'pHemorrhagic', from: 'Availability', to: 'Hemorrhagic', label: p(this.pHemorrhagic), value: this.pHemorrhagic},
+          {id: 'pAvailability2', from: 'Availability', to: 'LVO'},
           {id: 'pLVO', from: 'Ischemic', to: 'LVO', label: p(this.params.pLVO.val), value: this.params.pLVO.val},
           {id: 'pSVO', from: 'Ischemic', to: 'SVO', label: p(this.pSVO), value: this.pSVO},
           {id: 'pModerate', from: 'LVO', to: 'Moderate', label: p(this.params.pModerate.val), value: this.params.pModerate.val},
           {id: 'pMild', from: 'LVO', to: 'Mild', label: p(this.pMild), value: this.pMild},
           {id: 'pKTO', from: 'Moderate', to: 'KTO', label: p(this.params.pKTO.val), value: this.params.pKTO.val},
           {id: 'pSUTO', from: 'Moderate', to: 'SUTO', label: p(this.params.pSUTO.val), value: this.params.pSUTO.val},
-          {id: 'pGT12h', from: 'Moderate', to: 'TooLate', label: p(this.params.pGT12h.val), value: this.params.pGT12h.val},
+          {id: 'pGT12h', from: 'Moderate', to: 'TooLate', label: p(this.pGT12h), value: this.pGT12h},
 
           {id: 'pLT4h', from: 'KTO', to: 'LT4h', label: p(this.params.pLT4h.val), value: this.params.pLT4h.val},
           {id: 'pEarlyInclusion', from: 'LT4h', to: 'EarlyInclusion', label: p(this.params.pEarlyInclusion.val), value: this.params.pEarlyInclusion.val},
@@ -234,6 +249,28 @@ export default {
       }
     }
   },
+  watch: {
+    bRemoteness: function (bNewRemoteness) {
+      if (bNewRemoteness) {
+        this.params.pKTO.val = this.params.pKTO.default - 0.15 // pGT12h will be automatically adjusted via computed reactivity
+        this.params.pLT4h.val = this.params.pLT4h.default / 2 // pGT4h will be automatically adjusted
+      }
+      else {
+        this.params.pKTO.val = this.params.pKTO.default
+        this.params.pLT4h.val = this.params.pLT4h.default
+      }
+    },
+    bAvailability: function (bNewAvailability) {
+      if (bNewAvailability) {
+        this.params.pAvailability2018.val = 0.37 // Waikato 2017 vs 0.38 for afterhours
+        this.params.pAvailability2022.val = 0.85
+      }
+      else {
+        this.params.pAvailability2018.val = this.params.pAvailability2018.default
+        this.params.pAvailability2022.val = this.params.pAvailability2022.default
+      }
+    }
+  },
   mounted () {
     Toast.create({
       html: 'Click the menu icon in the top left of the toolbar to redisplay the menu',
@@ -250,6 +287,9 @@ export default {
       Object.keys(this.params).forEach(function (paramName) {
         self.params[paramName].val = self.params[paramName].default
       })
+    },
+    getAvailability: function (year) {
+      return (this.params.pAvailability2018.val + (this.params.pAvailability2022.val - this.params.pAvailability2018.val) / (2022 - year + 1))
     },
     getCalculatedPopulation: function (dhbs, growth, year) {
       var x = 0

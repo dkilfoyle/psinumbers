@@ -5,19 +5,23 @@
       thead
         tr
           th Parameter
+          th Default
           th Setting
       tbody
         tr
           td DHBs
+          td
           td {{ population.dhbs.join(', ') }}
         tr(v-for="param in params" v-if="param.val !== param.default")
           td {{ param.label }}
-          td {{ param.val }}
+          td {{ param.default | p }}
+          td {{ param.val | p }}
         tr(v-if="Object.values(params).find(x => x.val === x.default) === undefined")
           td No custom parameters
 </template>
 
 <script>
+import numeral from 'numeral'
 
 export default {
   name: 'custom-param-table',
@@ -26,6 +30,12 @@ export default {
   props: ['params', 'population'],
   data () {
     return {
+      numeral: numeral
+    }
+  },
+  filters: {
+    p: function (x) {
+      return numeral(x).format('0%')
     }
   }
 }

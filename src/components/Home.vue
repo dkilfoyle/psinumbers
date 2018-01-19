@@ -5,6 +5,8 @@
         q-icon(name="menu")
       q-toolbar-title Hyperacute Stroke Treatment Estimator
         div(slot="subtitle") Adapted from McMeekin et al. ESJ 2017; 24(3): 319-326
+      a(href="https://github.com/dkilfoyle/psinumbers").text-white
+        q-icon(name="fa-github")
 
     div(slot="left")
       q-list(no-border link)
