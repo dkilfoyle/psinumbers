@@ -21,5 +21,5 @@ module.exports = {
   pLateInclusion: { name: 'pLateInclusion', val: 0.25, default: 0.25, group: 'Late Presenters', label: 'No Exclusions', helper: '% with mRS<2 and ASPECTS>6' },
   pCTPGood: { name: 'pCTPGood', val: 0.57, default: 0.57, group: 'Late Presenters', label: 'Favourable CTP', helper: '% with favourable CTP' },
 
-  pOvernight: { name: 'pOvernight', val: 0.10, default: 0.10, group: 'Time of Day', label: 'Overnight', helper: '% presenting overnight' }
+  pOvernight: { name: 'pOvernight', val: 0.20, default: 0.20, group: 'Time of Day', label: 'Overnight', helper: '% presenting overnight' }
 }

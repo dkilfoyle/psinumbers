@@ -252,7 +252,7 @@ export default {
   watch: {
     bRemoteness: function (bNewRemoteness) {
       if (bNewRemoteness) {
-        this.params.pKTO.val = this.params.pKTO.default - 0.15 // pGT12h will be automatically adjusted via computed reactivity
+        this.params.pKTO.val = this.params.pKTO.default - 0.10 // pGT12h will be automatically adjusted via computed reactivity
         this.params.pLT4h.val = this.params.pLT4h.default / 2 // pGT4h will be automatically adjusted
       }
       else {
@@ -262,8 +262,8 @@ export default {
     },
     bAvailability: function (bNewAvailability) {
       if (bNewAvailability) {
-        this.params.pAvailability2018.val = 0.37 // Waikato 2017 vs 0.38 for afterhours
-        this.params.pAvailability2022.val = 0.85
+        this.params.pAvailability2018.val = 0.20 // Waikato 2017 vs 0.38 for afterhours
+        this.params.pAvailability2022.val = 0.70
       }
       else {
         this.params.pAvailability2018.val = this.params.pAvailability2018.default
@@ -289,7 +289,7 @@ export default {
       })
     },
     getAvailability: function (year) {
-      return (this.params.pAvailability2018.val + (this.params.pAvailability2022.val - this.params.pAvailability2018.val) / (2022 - year + 1))
+      return (this.params.pAvailability2018.val + (this.params.pAvailability2022.val - this.params.pAvailability2018.val) * (year - 2018) / 4)
     },
     getCalculatedPopulation: function (dhbs, growth, year) {
       var x = 0
@@ -301,7 +301,7 @@ export default {
     },
     getTotalPSI: function (sPopulations, year) {
       var x = this.getCalculatedPopulation(sPopulations, this.population.growth, year)
-      x = x * this.params.pAdults.val * (this.params.pIncidence.val / 100000) * this.params.pIschemic.val * this.params.pLVO.val * this.params.pModerate.val
+      x = x * this.params.pAdults.val * (this.params.pIncidence.val / 100000) * this.getAvailability(year) * this.params.pIschemic.val * this.params.pLVO.val * this.params.pModerate.val
 
       var early = x * this.params.pKTO.val * this.params.pLT4h.val * this.params.pEarlyInclusion.val * (1.0 - this.params.pRecannalized.val)
       var gt4h = x * this.params.pKTO.val * (1.0 - this.params.pLT4h.val)
@@ -311,14 +311,14 @@ export default {
       return Math.round(early + late)
     },
     getPSIperDay: function (sPopulations, year) {
-      return this.numeral(this.getTotalPSI(sPopulations, year) / 365.0).format('0.0')
+      return this.numeral(this.getTotalPSI(sPopulations, year) / 365.0).format('0.00')
     },
     getPSIperNight: function (sPopulations, year) {
-      return this.numeral(this.getTotalPSI(sPopulations, year) / 365.0 * this.params.pOvernight.val).format('0.0')
+      return this.numeral(this.getTotalPSI(sPopulations, year) / 365.0 * this.params.pOvernight.val).format('0.00')
     },
     getIVTPSI: function (sPopulations, year) {
       var x = this.getCalculatedPopulation(sPopulations, year)
-      x = x * this.params.pAdults.val * (this.params.pIncidence.val / 100000) * this.params.pIschemic.val * this.params.pLVO.val * this.params.pModerate.val
+      x = x * this.params.pAdults.val * (this.params.pIncidence.val / 100000) * this.getAvailability(year) * this.params.pIschemic.val * this.params.pLVO.val * this.params.pModerate.val
 
       var early = x * this.params.pKTO.val * this.params.pLT4h.val * this.params.pEarlyInclusion.val * (1.0 - this.params.pRecannalized.val)
       return Math.round(early)
