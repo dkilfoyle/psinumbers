@@ -17,10 +17,12 @@
             q-input(v-if="param.type==='number'" v-model="param.val")
 
         q-collapsible(group="parameters" label="Defaults" icon="settings" separator)
-          q-field(label="Remoteness Adjuster" helper="Adjust parameters for remote populations. Decrease hyperacute % and increase time delays")
-            q-checkbox(v-model="bRemoteness")
-          q-field(label="Availability Filter" helper="Reduce availability to in-hours only")
-            q-checkbox(v-model="bAvailability")
+          //- q-field(label="Remoteness Adjuster" helper="Adjust parameters for remote populations. Decrease hyperacute % and increase time delays")
+          //-   q-checkbox(v-model="bRemoteness")
+          //- q-field(label="Availability Filter" helper="Reduce availability to in-hours only")
+          //-   q-checkbox(v-model="bAvailability")
+          q-field(label="Parameter Presets")
+            q-select(v-model="paramPreset" :options="paramPresetOptions")
           q-btn(@click="resetDefaults()" color="secondary" class="full-width") Reset All
 
       q-list
@@ -129,6 +131,16 @@ export default {
         { label: 'Early Presenters', icon: 'timer' },
         { label: 'Late Presenters', icon: 'timer_off' },
         { label: 'Time of Day', icon: 'access_time' } ],
+      paramPreset: 'Defaults',
+      paramPresetOptions: [
+        { value: 'Defaults', label: 'Defaults' },
+        { value: 'PragmaticMetro', label: 'PragmaticMetro' },
+        { value: 'PragmaticNonMetro', label: 'PragmaticNonMetro' },
+        { value: 'OptimalMetro', label: 'OptimalMetro' },
+        { value: 'OptimalNonMetro', label: 'OptimalNonMetro' },
+        { value: 'FutureMetro', label: 'FutureMetro' },
+        { value: 'FutureNonMetro', label: 'FutureNonMetro' }
+      ],
       population: { regions: ['Metro'], dhbs: ['Auckland', 'Counties Manukau', 'Waitemata'], year: 2018 },
       params: Params,
       DHBs: DHBs
@@ -159,7 +171,7 @@ export default {
     nLT4h: function () { return (this.nKTO * this.params.pLT4h.val) },
     nEarlyInclusion: function () { return (this.nLT4h * this.params.pEarlyInclusion.val) },
     pEarlyExclusion: function () { return (1.0 - this.params.pEarlyInclusion.val) },
-    nEarlyExclusion: function () { return (this.nLT4h * this.pEarlyExclusion.val) },
+    nEarlyExclusion: function () { return (this.nLT4h * this.pEarlyExclusion) },
     nPSIReqd: function () { return (this.nEarlyInclusion * this.pNotRecannalized) },
     pNotRecannalized: function () { return (1.0 - this.params.pRecannalized.val) },
     nPSINotReqd: function () { return (this.nEarlyInclusion * this.params.pRecannalized.val) },
@@ -198,8 +210,8 @@ export default {
           {id: 'KTO', label: '*Onset or LSW < 12h*\nN=' + n(this.nKTO), level: 7},
           {id: 'LT4h', label: '*Onset < 4h*\nN=' + n(this.nLT4h), level: 8},
           {id: 'GT4h', label: '*Onset > 4h\nN=' + n(this.nGT4h), level: 8, group: 'late'},
-          {id: 'EarlyInclusion', label: '*mRS/ASPECTS*\nInclusion\nN=' + n(this.nEarlyExclusion), level: 9},
-          {id: 'EarlyExclusion', label: '*mRS/ASPECTS*\nExclusion\nN=' + n(this.nEarlyInclusion), level: 9, group: 'out'},
+          {id: 'EarlyInclusion', label: '*mRS/ASPECTS*\nInclusion\nN=' + n(this.nEarlyInclusion), level: 9},
+          {id: 'EarlyExclusion', label: '*mRS/ASPECTS*\nExclusion\nN=' + n(this.nEarlyExclusion), level: 9, group: 'out'},
           {id: 'PSIReqd', label: '*PSI Required*\nN=' + n(this.nPSIReqd), level: 10},
           {id: 'PSINotReqd', label: '*Recannalized*\nN=' + n(this.nPSINotReqd), level: 10, group: 'out'},
 
@@ -250,26 +262,83 @@ export default {
     }
   },
   watch: {
-    bRemoteness: function (bNewRemoteness) {
-      if (bNewRemoteness) {
-        this.params.pKTO.val = this.params.pKTO.default - 0.10 // pGT12h will be automatically adjusted via computed reactivity
-        this.params.pLT4h.val = this.params.pLT4h.default / 2 // pGT4h will be automatically adjusted
-      }
-      else {
-        this.params.pKTO.val = this.params.pKTO.default
-        this.params.pLT4h.val = this.params.pLT4h.default
-      }
-    },
-    bAvailability: function (bNewAvailability) {
-      if (bNewAvailability) {
-        this.params.pAvailability2018.val = 0.20 // Waikato 2017 vs 0.38 for afterhours
-        this.params.pAvailability2022.val = 0.70
-      }
-      else {
-        this.params.pAvailability2018.val = this.params.pAvailability2018.default
-        this.params.pAvailability2022.val = this.params.pAvailability2022.default
+    paramPreset: function (newpreset) {
+      switch (newpreset) {
+        case 'Defaults':
+          this.resetDefaults()
+          break
+        case 'PragmaticMetro':
+          this.resetDefaults()
+          this.population.regions = ['Metro']
+          this.population.dhbs = ['Auckland', 'Counties Manukau', 'Waitemata']
+          this.params.pAvailability2018.val = 0.58
+          this.params.pAvailability2022.val = 1.0
+          break
+        case 'PragmaticNonMetro':
+          this.resetDefaults()
+          this.population.regions = ['MidNorth']
+          this.population.dhbs = ['Waikato', 'BOP', 'Tairawhiti', 'Lakes', 'Taranaki', 'Northland']
+          this.params.pAvailability2018.val = 0.20
+          this.params.pAvailability2022.val = 0.70
+          this.params.pKTO.val = 0.68
+          this.params.pLT4h.val = 0.37
+          break
+        case 'OptimalMetro':
+          this.resetDefaults()
+          this.population.regions = ['Metro']
+          this.population.dhbs = ['Auckland', 'Counties Manukau', 'Waitemata']
+          this.params.pAvailability2018.val = 1.0
+          this.params.pAvailability2022.val = 1.0
+          break
+        case 'OptimalNonMetro':
+          this.resetDefaults()
+          this.population.regions = ['MidNorth']
+          this.population.dhbs = ['Waikato', 'BOP', 'Tairawhiti', 'Lakes', 'Taranaki', 'Northland']
+          this.params.pAvailability2018.val = 1.0
+          this.params.pAvailability2022.val = 1.0
+          this.params.pKTO.val = 0.70
+          this.params.pLT4h.val = 0.50
+          break
+        case 'FutureMetro':
+          this.resetDefaults()
+          this.population.regions = ['Metro']
+          this.population.dhbs = ['Auckland', 'Counties Manukau', 'Waitemata']
+          this.params.pAvailability2018.val = 1.0
+          this.params.pAvailability2022.val = 1.0
+          this.params.pKTO.val = 0.82
+          this.params.pLT4h.val = 0.85
+          break
+        case 'FutureNonMetro':
+          this.resetDefaults()
+          this.population.regions = ['MidNorth']
+          this.population.dhbs = ['Waikato', 'BOP', 'Tairawhiti', 'Lakes', 'Taranaki', 'Northland']
+          this.params.pAvailability2018.val = 1.0
+          this.params.pAvailability2022.val = 1.0
+          this.params.pKTO.val = 0.82
+          this.params.pLT4h.val = 0.85
+          break
       }
     }
+    // bRemoteness: function (bNewRemoteness) {
+    //   if (bNewRemoteness) {
+    //     this.params.pKTO.val = this.params.pKTO.default - 0.10 // pGT12h will be automatically adjusted via computed reactivity
+    //     this.params.pLT4h.val = this.params.pLT4h.default / 2 // pGT4h will be automatically adjusted
+    //   }
+    //   else {
+    //     this.params.pKTO.val = this.params.pKTO.default
+    //     this.params.pLT4h.val = this.params.pLT4h.default
+    //   }
+    // },
+    // bAvailability: function (bNewAvailability) {
+    //   if (bNewAvailability) {
+    //     this.params.pAvailability2018.val = 0.20 // Waikato 2017 vs 0.38 for afterhours
+    //     this.params.pAvailability2022.val = 0.70
+    //   }
+    //   else {
+    //     this.params.pAvailability2018.val = this.params.pAvailability2018.default
+    //     this.params.pAvailability2022.val = this.params.pAvailability2022.default
+    //   }
+    // }
   },
   mounted () {
     Toast.create({
