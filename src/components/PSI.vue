@@ -216,7 +216,7 @@ export default {
           {id: 'PSINotReqd', label: '*Recannalized*\nN=' + n(this.nPSINotReqd), level: 10, group: 'out'},
 
           {id: 'SUTO', label: '*Onset Unknown*\nN=' + n(this.nSUTO), level: 7, group: 'late'},
-          {id: 'TooLate', label: '*Too Late*\nN=' + n(this.nTotalPSI), level: 7, group: 'out'},
+          {id: 'TooLate', label: '*Too Late*\nN=' + n(this.nTooLate), level: 7, group: 'out'},
           {id: 'Late', label: '*Late\nN=' + n(this.nLate), level: 8, group: 'late'},
           {id: 'LateInclusion', label: '*mRS/ASPECTS*\nInclusion\nN=' + n(this.nLateInclusion), level: 9, group: 'late'},
           {id: 'LateExclusion', label: '*mRS/ASPECTS*\nExclusion\nN=' + n(this.nLateExclusion), level: 9, group: 'out'},
