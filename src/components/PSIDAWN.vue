@@ -144,10 +144,11 @@ export default {
     nPopulation: function () { return this.getCalculatedPopulation(this.population.dhbs, this.population.growth, this.population.year) },
     nAdults: function () { return (this.nPopulation * this.params.pAdults.val) },
     nStrokes: function () { return (this.nAdults * (this.params.pIncidence.val / 100000)) },
+    nHospital: function () { return (this.nStrokes * this.params.pHospital.val) },
 
-    nAvailability: function () { return (this.nStrokes * this.getAvailability(this.population.year)) },
+    nAvailability: function () { return (this.nHospital * this.getAvailability(this.population.year)) },
     pNoAvailability: function () { return (1.0 - this.getAvailability(this.population.year)) },
-    nNoAvailability: function () { return (this.nStrokes * this.pNoAvailability) },
+    nNoAvailability: function () { return (this.nHospital * this.pNoAvailability) },
 
     nIschemic: function () { return (this.nAvailability * this.params.pIschemic.val) },
     pHemorrhagic: function () { return (1.0 - this.params.pIschemic.val) },
@@ -175,33 +176,34 @@ export default {
           {id: 'Population', label: '*Population*\nN=' + n(this.nPopulation), level: 0, shape: 'ellipse', font: {multi: 'md'}, group: 'end'},
           {id: 'Adults', label: '*Adults*\nN=' + n(this.nAdults), level: 1, group: 0},
           {id: 'Strokes', label: '*Strokes*\nN=' + n(this.nStrokes), level: 2, group: 0},
-          {id: 'Availability', label: '*Resources*\nAvailable\nN=' + n(this.nAvailability), level: 3, group: 0},
-          {id: 'NoAvailability', label: '*Resources*\nNot Available\nN=' + n(this.nNoAvailability), level: 2, group: 'out'},
-          {id: 'Ischemic', label: '*Ischemic\nN=' + n(this.nIschemic), level: 4, group: 0},
-          {id: 'Hemorrhagic', label: '*Hemorrhagic*\nN=' + n(this.nHemorrhagic), level: 3, group: 'out'},
+          {id: 'Hospital', label: '*Hospitalized*\nN=' + n(this.nHospital), level: 3, group: 0},
+          {id: 'Availability', label: '*Resources*\nAvailable\nN=' + n(this.nAvailability), level: 4, group: 0},
+          {id: 'NoAvailability', label: '*Resources*\nNot Available\nN=' + n(this.nNoAvailability), level: 4, group: 'out'},
+          {id: 'Ischemic', label: '*Ischemic\nN=' + n(this.nIschemic), level: 5, group: 0},
+          {id: 'Hemorrhagic', label: '*Hemorrhagic*\nN=' + n(this.nHemorrhagic), level: 5, group: 'out'},
 
-          {id: 'LSW624h', label: '*Onset or LSW < 24h*\nN=' + n(this.nLSW624h), level: 5},
-          {id: 'Moderate', label: '*NIHSS > 6*\nN=' + n(this.nModerate), level: 6},
-          {id: 'LVO', label: '*LVO*\nN=' + n(this.nLVO), level: 7},
-          {id: 'SVO', label: '*SVO*\nN=' + n(this.nSVO), level: 6, group: 'out'},
-          {id: 'CTPGood', label: '*CTP Acceptable*\nN=' + n(this.nCTPGood), level: 8, group: 'end'},
-          {id: 'CTPBad', label: '*CTP Unfavourable*\nN=' + n(this.nCTPBad), level: 7, group: 'out'}
+          {id: 'LSW624h', label: '*Onset or LSW < 24h*\nN=' + n(this.nLSW624h), level: 6},
+          {id: 'Moderate', label: '*NIHSS > 6*\nN=' + n(this.nModerate), level: 7},
+          {id: 'LVO', label: '*LVO*\nN=' + n(this.nLVO), level: 8},
+          {id: 'SVO', label: '*SVO*\nN=' + n(this.nSVO), level: 8, group: 'out'},
+          {id: 'CTPGood', label: '*CTP Acceptable*\nN=' + n(this.nCTPGood), level: 9, group: 'end'},
+          {id: 'CTPBad', label: '*CTP Unfavourable*\nN=' + n(this.nCTPBad), level: 9, group: 'out'}
         ],
         edges: [
           {id: 'pAdults', from: 'Population', to: 'Adults', label: 'Adults ' + p(this.params.pAdults.val), value: 1.0},
           {id: 'pStrokes', from: 'Adults', to: 'Strokes', label: 'Incidence\n' + this.params.pIncidence.val + '/100,000', value: 1.0},
-          {id: 'pAvailability', from: 'Strokes', to: 'Availability', label: p(this.getAvailability(this.population.year)), value: this.getAvailability(this.population.year)},
-          {id: 'pNoAvailability', from: 'Strokes', to: 'NoAvailability', label: p(this.pNoAvailability), value: this.pNoAvailability},
+          {id: 'pHospital', from: 'Strokes', to: 'Hospital', label: 'Hospitalized\n' + p(this.params.pHospital.val), value: 1.0},
+          {id: 'pAvailability', from: 'Hospital', to: 'Availability', label: p(this.getAvailability(this.population.year)), value: this.getAvailability(this.population.year)},
+          {id: 'pNoAvailability', from: 'Hospital', to: 'NoAvailability', label: p(this.pNoAvailability), value: this.pNoAvailability},
           {id: 'pIschemic', from: 'Availability', to: 'Ischemic', label: p(this.params.pIschemic.val), value: this.params.pIschemic.val},
           {id: 'pHemorrhagic', from: 'Availability', to: 'Hemorrhagic', label: p(this.pHemorrhagic), value: this.pHemorrhagic},
-          {id: 'pAvailability2', from: 'Availability', to: 'LVO'},
           {id: 'pLVO', from: 'Moderate', to: 'LVO', label: p(this.params.pLVO.val), value: this.params.pLVO.val},
           {id: 'pSVO', from: 'Moderate', to: 'SVO', label: p(this.pSVO), value: this.pSVO},
           {id: 'pModerate', from: 'LSW624h', to: 'Moderate', label: p(this.params.pModerate.val), value: this.params.pModerate.val},
           {id: 'pMild', from: 'LSW624h', to: 'Mild', label: p(this.pMild), value: this.pMild},
           {id: 'pLSW624h', from: 'Ischemic', to: 'LSW624h', label: p(this.params.pLSW624h.val), value: this.params.pLSW624h.val},
-          {id: 'pCTPBad', from: 'LVO', to: 'CTPBad', label: p(this.pCTPBad), value: this.pCTPBad},
-          {id: 'pCTPGood', from: 'LVO', to: 'CTPGood', label: p(this.params.pCTPGood.val), value: this.params.pCTPGood.val}
+          {id: 'pCTPGood', from: 'LVO', to: 'CTPGood', label: p(this.params.pCTPGood.val), value: this.params.pCTPGood.val},
+          {id: 'pCTPBad', from: 'LVO', to: 'CTPBad', label: p(this.pCTPBad), value: this.pCTPBad}
         ]
       }
     }
@@ -315,7 +317,7 @@ export default {
     },
     getTotalPSI: function (sPopulations, year) {
       var x = this.getCalculatedPopulation(sPopulations, this.population.growth, year)
-      x = x * this.params.pAdults.val * (this.params.pIncidence.val / 100000) * this.getAvailability(year) * this.params.pIschemic.val
+      x = x * this.params.pAdults.val * (this.params.pIncidence.val / 100000) * this.params.pHospital.val * this.getAvailability(year) * this.params.pIschemic.val
       x = x * this.params.pLSW624h.val * this.params.pModerate.val * this.params.pLVO.val * this.params.pCTPGood.val
       return Math.round(x)
     },

@@ -1,6 +1,7 @@
 module.exports = {
   pAdults: { name: 'pAdults', val: 0.8, default: 0.8, group: 'Demographics', label: 'Adults', helper: '% of population that are aged >= 15y' },
   pIncidence: { name: 'pIncidence', val: 192, default: 192, type: 'number', group: 'Demographics', label: 'Stroke Incidence', helper: 'Number of strokes/100,000 adults /yr' },
+  pHospital: { name: 'pHospital', val: 0.86, default: 0.86, group: 'Demographics', label: 'Hospital presentation', helper: '% of stroke that present to hospital' },
 
   pAvailability2018: { name: 'pAvailability2018', val: 1.00, default: 1.00, group: 'Radiology', label: 'Resources 2018', helper: 'Availability in 2018 of sufficient 24/7 resources for hyperacute workup' },
   pAvailability2022: { name: 'pAvailability2022', val: 1.00, default: 1.00, group: 'Radiology', label: 'Resources 2022', helper: 'Availability in 2022 of sufficient 24/7 resources for hyperacute workup' },
