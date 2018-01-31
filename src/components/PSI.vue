@@ -181,7 +181,7 @@ export default {
     nSUTO: function () { return (this.nModerate * this.params.pSUTO.val) },
     nLate: function () { return (this.nGT4h + this.nSUTO) },
     pGT12h: function () { return (1.0 - this.params.pKTO.val - this.params.pSUTO.val) },
-    nTooLate: function () { return (this.nModerate - this.params.pGT12h.val) },
+    nTooLate: function () { return (this.nModerate * this.pGT12h) },
 
     nLateInclusion: function () { return (this.nLate * this.params.pLateInclusion.val) },
     pLateExclusion: function () { return (1.0 - this.params.pLateInclusion.val) },

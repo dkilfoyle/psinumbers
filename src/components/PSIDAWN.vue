@@ -2,7 +2,7 @@
   my-layout
     div(slot="settings")
       q-list
-        q-list-header PSI Parameters
+        q-list-header PSI (DAWN) Parameters
         q-item-separator
 
         q-collapsible(group="parameters" label="Demographics" icon="people" separator)
@@ -17,10 +17,6 @@
             q-input(v-if="param.type==='number'" v-model="param.val")
 
         q-collapsible(group="parameters" label="Defaults" icon="settings" separator)
-          //- q-field(label="Remoteness Adjuster" helper="Adjust parameters for remote populations. Decrease hyperacute % and increase time delays")
-          //-   q-checkbox(v-model="bRemoteness")
-          //- q-field(label="Availability Filter" helper="Reduce availability to in-hours only")
-          //-   q-checkbox(v-model="bAvailability")
           q-field(label="Parameter Presets")
             q-select(v-model="paramPreset" :options="paramPresetOptions")
           q-btn(@click="resetDefaults()" color="secondary" class="full-width") Reset All
@@ -102,14 +98,14 @@ import FlowChartViewer from './FlowChartViewer'
 import CustomParamTable from './CustomParamTable'
 import numeral from 'numeral'
 import DHBs from './dhbs.js'
-import Params from './PSIParams'
+import Params from './PSIDAWNParams'
 import paramFilters from './paramFilters'
 
 var n = function (mynum) { return numeral(mynum).format('0,0') }
 var p = function (mynum) { return numeral(mynum).format('0%') }
 
 export default {
-  name: 'psi',
+  name: 'psidawn',
   components: {
     CustomParamTable, FlowChartViewer, MyLayout, PopulationSelector, QTooltip, QBtn, QIcon, QList, QItem, QItemMain, QListHeader, QItemSeparator, QInput, QSlider, QField, QCollapsible, QSelect, QRadio, QCheckbox
   },
@@ -128,8 +124,6 @@ export default {
         { label: 'Radiology', icon: 'scanner' },
         { label: 'Clinical', icon: 'favorite' },
         { label: 'Onset Time', icon: 'timelapse' },
-        { label: 'Early Presenters', icon: 'timer' },
-        { label: 'Late Presenters', icon: 'timer_off' },
         { label: 'Time of Day', icon: 'access_time' } ],
       paramPreset: 'Defaults',
       paramPresetOptions: [
@@ -159,38 +153,21 @@ export default {
     pHemorrhagic: function () { return (1.0 - this.params.pIschemic.val) },
     nHemorrhagic: function () { return (this.nAvailability * this.pHemorrhagic) },
 
-    nLVO: function () { return (this.nIschemic * this.params.pLVO.val) },
-    pSVO: function () { return (1.0 - this.params.pLVO.val) },
-    nSVO: function () { return (this.nIschemic * this.pSVO) },
+    nLSW624h: function () { return (this.nIschemic * this.params.pLSW624h.val) },
 
-    nModerate: function () { return (this.nLVO * this.params.pModerate.val) },
+    nModerate: function () { return (this.nLSW624h * this.params.pModerate.val) },
     pMild: function () { return (1.0 - this.params.pModerate.val) },
-    nMild: function () { return (this.nLVO * this.pMild) },
+    nMild: function () { return (this.nLSW624h * this.pMild) },
 
-    nKTO: function () { return (this.nModerate * this.params.pKTO.val) },
-    nLT4h: function () { return (this.nKTO * this.params.pLT4h.val) },
-    nEarlyInclusion: function () { return (this.nLT4h * this.params.pEarlyInclusion.val) },
-    pEarlyExclusion: function () { return (1.0 - this.params.pEarlyInclusion.val) },
-    nEarlyExclusion: function () { return (this.nLT4h * this.pEarlyExclusion) },
-    nPSIReqd: function () { return (this.nEarlyInclusion * this.pNotRecannalized) },
-    pNotRecannalized: function () { return (1.0 - this.params.pRecannalized.val) },
-    nPSINotReqd: function () { return (this.nEarlyInclusion * this.params.pRecannalized.val) },
+    nLVO: function () { return (this.nModerate * this.params.pLVO.val) },
+    pSVO: function () { return (1.0 - this.params.pLVO.val) },
+    nSVO: function () { return (this.nModerate * this.pSVO) },
 
-    pGT4h: function () { return (1.0 - this.params.pLT4h.val) },
-    nGT4h: function () { return (this.nKTO * this.pGT4h) },
-    nSUTO: function () { return (this.nModerate * this.params.pSUTO.val) },
-    nLate: function () { return (this.nGT4h + this.nSUTO) },
-    pGT12h: function () { return (1.0 - this.params.pKTO.val - this.params.pSUTO.val) },
-    nTooLate: function () { return (this.nModerate - this.params.pGT12h.val) },
-
-    nLateInclusion: function () { return (this.nLate * this.params.pLateInclusion.val) },
-    pLateExclusion: function () { return (1.0 - this.params.pLateInclusion.val) },
-    nLateExclusion: function () { return (this.nLate * this.pLateExclusion) },
-    nCTPGood: function () { return (this.nLateInclusion * this.params.pCTPGood.val) },
+    nCTPGood: function () { return (this.nLVO * this.params.pCTPGood.val) },
     pCTPBad: function () { return (1.0 - this.params.pCTPGood.val) },
-    nCTPBad: function () { return (this.nLateInclusion * this.pCTPBad) },
+    nCTPBad: function () { return (this.nLVO * this.pCTPBad) },
 
-    nTotalPSI: function () { return (this.nPSIReqd + this.nCTPGood) },
+    nTotalPSI: function () { return (this.nCTPGood) },
 
     flowchartData: function () {
       return {
@@ -202,28 +179,13 @@ export default {
           {id: 'NoAvailability', label: '*Resources*\nNot Available\nN=' + n(this.nNoAvailability), level: 2, group: 'out'},
           {id: 'Ischemic', label: '*Ischemic\nN=' + n(this.nIschemic), level: 4, group: 0},
           {id: 'Hemorrhagic', label: '*Hemorrhagic*\nN=' + n(this.nHemorrhagic), level: 3, group: 'out'},
-          {id: 'LVO', label: '*LVO*\nN=' + n(this.nLVO), level: 5},
-          {id: 'SVO', label: '*SVO*\nN=' + n(this.nSVO), level: 4, group: 'out'},
+
+          {id: 'LSW624h', label: '*Onset or LSW < 24h*\nN=' + n(this.nLSW624h), level: 5},
           {id: 'Moderate', label: '*NIHSS > 6*\nN=' + n(this.nModerate), level: 6},
-          {id: 'Mild', label: '*NIHSS <= 6\nN=' + n(this.nMild), level: 5, group: 'out'},
-
-          {id: 'KTO', label: '*Onset or LSW < 12h*\nN=' + n(this.nKTO), level: 7},
-          {id: 'LT4h', label: '*Onset < 4h*\nN=' + n(this.nLT4h), level: 8},
-          {id: 'GT4h', label: '*Onset > 4h\nN=' + n(this.nGT4h), level: 8, group: 'late'},
-          {id: 'EarlyInclusion', label: '*mRS/ASPECTS*\nInclusion\nN=' + n(this.nEarlyInclusion), level: 9},
-          {id: 'EarlyExclusion', label: '*mRS/ASPECTS*\nExclusion\nN=' + n(this.nEarlyExclusion), level: 9, group: 'out'},
-          {id: 'PSIReqd', label: '*PSI Required*\nN=' + n(this.nPSIReqd), level: 10},
-          {id: 'PSINotReqd', label: '*Recannalized*\nN=' + n(this.nPSINotReqd), level: 10, group: 'out'},
-
-          {id: 'SUTO', label: '*Onset Unknown*\nN=' + n(this.nSUTO), level: 7, group: 'late'},
-          {id: 'TooLate', label: '*Too Late*\nN=' + n(this.nTooLate), level: 7, group: 'out'},
-          {id: 'Late', label: '*Late\nN=' + n(this.nLate), level: 8, group: 'late'},
-          {id: 'LateInclusion', label: '*mRS/ASPECTS*\nInclusion\nN=' + n(this.nLateInclusion), level: 9, group: 'late'},
-          {id: 'LateExclusion', label: '*mRS/ASPECTS*\nExclusion\nN=' + n(this.nLateExclusion), level: 9, group: 'out'},
-          {id: 'CTPGood', label: '*CTP Acceptable*\nN=' + n(this.nCTPGood), level: 10, group: 'late'},
-          {id: 'CTPBad', label: '*CTP Unfavourable*\nN=' + n(this.nCTPBad), level: 10, group: 'out'},
-
-          {id: 'TotalPSI', label: '*Total PSI*\nN=' + n(this.nTotalPSI), level: 11, group: 'end'}
+          {id: 'LVO', label: '*LVO*\nN=' + n(this.nLVO), level: 7},
+          {id: 'SVO', label: '*SVO*\nN=' + n(this.nSVO), level: 6, group: 'out'},
+          {id: 'CTPGood', label: '*CTP Acceptable*\nN=' + n(this.nCTPGood), level: 8, group: 'end'},
+          {id: 'CTPBad', label: '*CTP Unfavourable*\nN=' + n(this.nCTPBad), level: 7, group: 'out'}
         ],
         edges: [
           {id: 'pAdults', from: 'Population', to: 'Adults', label: 'Adults ' + p(this.params.pAdults.val), value: 1.0},
@@ -233,30 +195,13 @@ export default {
           {id: 'pIschemic', from: 'Availability', to: 'Ischemic', label: p(this.params.pIschemic.val), value: this.params.pIschemic.val},
           {id: 'pHemorrhagic', from: 'Availability', to: 'Hemorrhagic', label: p(this.pHemorrhagic), value: this.pHemorrhagic},
           {id: 'pAvailability2', from: 'Availability', to: 'LVO'},
-          {id: 'pLVO', from: 'Ischemic', to: 'LVO', label: p(this.params.pLVO.val), value: this.params.pLVO.val},
-          {id: 'pSVO', from: 'Ischemic', to: 'SVO', label: p(this.pSVO), value: this.pSVO},
-          {id: 'pModerate', from: 'LVO', to: 'Moderate', label: p(this.params.pModerate.val), value: this.params.pModerate.val},
-          {id: 'pMild', from: 'LVO', to: 'Mild', label: p(this.pMild), value: this.pMild},
-          {id: 'pKTO', from: 'Moderate', to: 'KTO', label: p(this.params.pKTO.val), value: this.params.pKTO.val},
-          {id: 'pSUTO', from: 'Moderate', to: 'SUTO', label: p(this.params.pSUTO.val), value: this.params.pSUTO.val},
-          {id: 'pGT12h', from: 'Moderate', to: 'TooLate', label: p(this.pGT12h), value: this.pGT12h},
-
-          {id: 'pLT4h', from: 'KTO', to: 'LT4h', label: p(this.params.pLT4h.val), value: this.params.pLT4h.val},
-          {id: 'pEarlyInclusion', from: 'LT4h', to: 'EarlyInclusion', label: p(this.params.pEarlyInclusion.val), value: this.params.pEarlyInclusion.val},
-          {id: 'pEarlyExclusion', from: 'LT4h', to: 'EarlyExclusion', label: p(this.pEarlyExclusion), value: this.pEarlyExclusion},
-          {id: 'pRecannalized', from: 'EarlyInclusion', to: 'PSINotReqd', label: p(this.params.pRecannalized.val), value: this.params.pRecannalized.val},
-          {id: 'pNotRecannalized', from: 'EarlyInclusion', to: 'PSIReqd', label: p(this.pNotRecannalized), value: this.pNotRecannalized},
-
-          {id: 'pGT4h', from: 'KTO', to: 'GT4h', label: p(this.pGT4h), value: this.pGT4h},
-          {id: 'late1', from: 'GT4h', to: 'Late', value: this.nGT4h / (this.nGT4h + this.nSUTO)},
-          {id: 'late2', from: 'SUTO', to: 'Late', value: this.nSUTO / (this.nGT4h + this.nSUTO)},
-          {id: 'pLateInclusion', from: 'Late', to: 'LateInclusion', label: p(this.params.pLateInclusion.val), value: this.params.pLateInclusion.val},
-          {id: 'pLateExclusion', from: 'Late', to: 'LateExclusion', label: p(this.pLateExclusion), value: this.pLateExclusion},
-          {id: 'pCTPBad', from: 'LateInclusion', to: 'CTPBad', label: p(this.pCTPBad), value: this.pCTPBad},
-          {id: 'pCTPGood', from: 'LateInclusion', to: 'CTPGood', label: p(this.params.pCTPGood.val), value: this.params.pCTPGood.val},
-
-          {id: 'Total1', from: 'PSIReqd', to: 'TotalPSI', value: this.nPSIReqd / (this.nPSIReqd + this.nCTPGood)},
-          {id: 'Total2', from: 'CTPGood', to: 'TotalPSI', value: this.nCTPGood / (this.nPSIReqd + this.nCTPGood)}
+          {id: 'pLVO', from: 'Moderate', to: 'LVO', label: p(this.params.pLVO.val), value: this.params.pLVO.val},
+          {id: 'pSVO', from: 'Moderate', to: 'SVO', label: p(this.pSVO), value: this.pSVO},
+          {id: 'pModerate', from: 'LSW624h', to: 'Moderate', label: p(this.params.pModerate.val), value: this.params.pModerate.val},
+          {id: 'pMild', from: 'LSW624h', to: 'Mild', label: p(this.pMild), value: this.pMild},
+          {id: 'pLSW624h', from: 'Ischemic', to: 'LSW624h', label: p(this.params.pLSW624h.val), value: this.params.pLSW624h.val},
+          {id: 'pCTPBad', from: 'LVO', to: 'CTPBad', label: p(this.pCTPBad), value: this.pCTPBad},
+          {id: 'pCTPGood', from: 'LVO', to: 'CTPGood', label: p(this.params.pCTPGood.val), value: this.params.pCTPGood.val}
         ]
       }
     }
@@ -370,14 +315,9 @@ export default {
     },
     getTotalPSI: function (sPopulations, year) {
       var x = this.getCalculatedPopulation(sPopulations, this.population.growth, year)
-      x = x * this.params.pAdults.val * (this.params.pIncidence.val / 100000) * this.getAvailability(year) * this.params.pIschemic.val * this.params.pLVO.val * this.params.pModerate.val
-
-      var early = x * this.params.pKTO.val * this.params.pLT4h.val * this.params.pEarlyInclusion.val * (1.0 - this.params.pRecannalized.val)
-      var gt4h = x * this.params.pKTO.val * (1.0 - this.params.pLT4h.val)
-      var suto = x * this.params.pSUTO.val
-      var late = (suto + gt4h) * this.params.pLateInclusion.val * this.params.pCTPGood.val
-
-      return Math.round(early + late)
+      x = x * this.params.pAdults.val * (this.params.pIncidence.val / 100000) * this.getAvailability(year) * this.params.pIschemic.val
+      x = x * this.params.pLSW624h.val * this.params.pModerate.val * this.params.pLVO.val * this.params.pCTPGood.val
+      return Math.round(x)
     },
     getPSIperDay: function (sPopulations, year) {
       return this.numeral(this.getTotalPSI(sPopulations, year) / 365.0).format('0.00')
@@ -386,11 +326,7 @@ export default {
       return this.numeral(this.getTotalPSI(sPopulations, year) / 365.0 * this.params.pOvernight.val).format('0.00')
     },
     getIVTPSI: function (sPopulations, year) {
-      var x = this.getCalculatedPopulation(sPopulations, year)
-      x = x * this.params.pAdults.val * (this.params.pIncidence.val / 100000) * this.getAvailability(year) * this.params.pIschemic.val * this.params.pLVO.val * this.params.pModerate.val
-
-      var early = x * this.params.pKTO.val * this.params.pLT4h.val * this.params.pEarlyInclusion.val * (1.0 - this.params.pRecannalized.val)
-      return Math.round(early)
+      return 0
     }
   }
 }

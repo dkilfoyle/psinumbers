@@ -30,6 +30,7 @@ export default new VueRouter({
       children: [
         { path: '/', component: load('PSI') },
         { path: 'PSI', component: load('PSI') },
+        { path: 'PSIDAWN', component: load('PSIDAWN') },
         { path: 'IVT', component: load('IVT') },
         { path: 'Diversion', component: load('Diversion') }
       ]
